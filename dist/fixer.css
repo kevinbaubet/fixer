@@ -1,0 +1,8 @@
+.is-fixed .fixer-element {
+  position: fixed;
+  top: 0;
+}
+.is-bottom .fixer-element {
+  position: absolute;
+  bottom: 0;
+}

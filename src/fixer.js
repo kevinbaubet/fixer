@@ -1,7 +1,7 @@
 /**
  * Fixer
  *
- * @version 2.0 (09/01/2017)
+ * @version 2.1 (17/02/2017)
  */
 (function($) {
     'use strict';
@@ -36,13 +36,15 @@
         from: undefined,
         to: undefined,
         reverse: false,
+        sensitivity: 8,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
             element: '{prefix}-element',
             input: 'is-input',
             fixed: 'is-fixed',
-            bottom: 'is-bottom'
+            bottom: 'is-bottom',
+            reset: 'is-reset'
         },
         afterEventsHandler: undefined,
         onScroll: undefined,
@@ -129,11 +131,11 @@
          */
         setFixerTop: function() {
             if (this.settings.from === undefined) {
-                this.fixerTop = this.elements.fixer.offset().top;
+                this.fixerTop = parseInt(this.elements.fixer.offset().top);
             } else if (this.settings.from < 0) {
                 this.fixerTop = parseInt(this.elements.fixer.offset().top + this.settings.from);
             } else {
-                this.fixerTop = this.settings.from;
+                this.fixerTop = parseInt(this.settings.from);
             }
         },
 
@@ -146,7 +148,7 @@
             } else if (this.settings.to < 0) {
                 this.fixerBottom = parseInt((this.elements.container.outerHeight() - this.elements.fixer.outerHeight()) + this.settings.to);
             } else {
-                this.fixerBottom = this.settings.to;
+                this.fixerBottom = parseInt(this.settings.to);
             }
 
             this.fixerBottom += this.fixerTop;
@@ -166,41 +168,46 @@
                     window.requestAnimationFrame(function() {
                         self.scrollTop = scrollEvent.scrollY;
 
-                        // En mode inverse
-                        if (self.settings.reverse) {
-                            // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
-                            if (self.previousScrollTop > self.scrollTop) {
-                                self.toFixed();
+                        // Sensibilité du scroll
+                        if ((Math.abs(self.previousScrollTop - self.scrollTop) > self.settings.sensitivity)) {
 
-                            // Si le scroll défile normalement, on remet à l'état par défaut
-                            } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.settings.from) {
-                                self.toReset();
-                            }
+                            // En mode inverse
+                            if (self.settings.reverse) {
 
-                            self.previousScrollTop = self.scrollTop;
+                                // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
+                                if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.fixerTop) {
+                                    self.toFixed();
 
-                        } else {
-                            // Si le scroll est entre le from/to défini, on fixe
-                            if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
-                                self.toFixed();
+                                // Si le scroll défile normalement, on remet à l'état par défaut
+                                } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.fixerTop) {
+                                    self.toReset();
+                                }
 
-                            // Si le scroll est supérieur à to, on arrête de fixer
-                            } else if (self.scrollTop >= self.fixerBottom) {
-                                self.toBottom();
+                                self.previousScrollTop = self.scrollTop;
 
-                            // Sinon, on remet à l'état par défaut
                             } else {
-                                self.toReset();
-                            }
-                        }
+                                // Si le scroll est entre le from/to défini, on fixe
+                                if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
+                                    self.toFixed();
 
-                        // User callback
-                        if (self.settings.onScroll !== undefined) {
-                            self.settings.onScroll.call({
-                                Fixer: self,
-                                event: scrollEvent,
-                                state: self.state
-                            });
+                                // Si le scroll est supérieur à to, on arrête de fixer
+                                } else if (self.scrollTop >= self.fixerBottom) {
+                                    self.toBottom();
+
+                                // Sinon, on remet à l'état par défaut
+                                } else {
+                                    self.toReset();
+                                }
+                            }
+
+                            // User callback
+                            if (self.settings.onScroll !== undefined) {
+                                self.settings.onScroll.call({
+                                    Fixer: self,
+                                    event: scrollEvent,
+                                    state: self.state
+                                });
+                            }
                         }
                     });
                 },
@@ -231,6 +238,7 @@
             // État
             this.state = 'fixed';
             this.elements.container
+                .removeClass(this.settings.classes.reset)
                 .removeClass(this.settings.classes.bottom)
                 .addClass(this.settings.classes.fixed);
 
@@ -247,6 +255,7 @@
             // État
             this.state = 'bottom';
             this.elements.container
+                .removeClass(this.settings.classes.reset)
                 .removeClass(this.settings.classes.fixed)
                 .addClass(this.settings.classes.bottom);
 
@@ -261,8 +270,13 @@
          */
         toReset: function() {
             // État
-            this.state = 'default';
             this.elements.container.removeClass(this.settings.classes.fixed);
+
+            if (this.state === 'fixed') {
+                this.elements.container.addClass(this.settings.classes.reset);
+            }
+            
+            this.state = 'default';
 
             // User callback
             if (this.settings.onReset !== undefined) {

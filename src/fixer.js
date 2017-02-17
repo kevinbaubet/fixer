@@ -98,7 +98,7 @@
         requestAnimationFramePolyfill: function() {
             var lastTime = 0;
             var vendorIndex = 0;
-            var vendors = ['ms', 'moz', 'webkit'];
+            var vendors = ['o', 'ms', 'moz', 'webkit'];
 
             for (vendorIndex = 0; vendorIndex < vendors.length && !window.requestAnimationFrame; ++vendorIndex) {
                 window.requestAnimationFrame = window[vendors[vendorIndex] + 'RequestAnimationFrame'];
@@ -166,7 +166,7 @@
                     var scrollEvent = this;
 
                     window.requestAnimationFrame(function() {
-                        self.scrollTop = scrollEvent.scrollY;
+                        self.scrollTop = scrollEvent.pageYOffset;
 
                         // Sensibilité du scroll
                         if ((Math.abs(self.previousScrollTop - self.scrollTop) > self.settings.sensitivity)) {

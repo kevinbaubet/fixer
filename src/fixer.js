@@ -1,7 +1,7 @@
 /**
  * Fixer
  *
- * @version 2.1 (17/02/2017)
+ * @version 2.2 (12/03/2017)
  */
 (function($) {
     'use strict';
@@ -37,6 +37,7 @@
         to: undefined,
         reverse: false,
         sensitivity: 8,
+        scrollerDependency: false,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
@@ -90,6 +91,8 @@
             // Event
             this.requestAnimationFramePolyfill();
             this.eventsHander();
+
+            return this;
         },
 
         /**
@@ -137,6 +140,8 @@
             } else {
                 this.fixerTop = parseInt(this.settings.from);
             }
+
+            return this;
         },
 
         /**
@@ -152,6 +157,8 @@
             }
 
             this.fixerBottom += this.fixerTop;
+
+            return this;
         },
 
         /**
@@ -161,64 +168,17 @@
             var self = this;
             var eventsReady = false;
 
-            $(window).on({
-                'scroll.fixer': function() {
-                    var scrollEvent = this;
+            if (!self.settings.scrollerDependency) {
+                $(window).on('scroll.fixer', {self: self}, self.scrollHandler);
+            }
 
-                    window.requestAnimationFrame(function() {
-                        self.scrollTop = scrollEvent.pageYOffset;
+            $(window).on('touchstart.fixer', function() {
+                if (eventsReady === false) {
+                    eventsReady = true;
 
-                        // Sensibilité du scroll
-                        if ((Math.abs(self.previousScrollTop - self.scrollTop) > self.settings.sensitivity)) {
-
-                            // En mode inverse
-                            if (self.settings.reverse) {
-
-                                // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
-                                if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.fixerTop) {
-                                    self.toFixed();
-
-                                // Si le scroll défile normalement, on remet à l'état par défaut
-                                } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.fixerTop) {
-                                    self.toReset();
-                                }
-
-                                self.previousScrollTop = self.scrollTop;
-
-                            } else {
-                                // Si le scroll est entre le from/to défini, on fixe
-                                if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
-                                    self.toFixed();
-
-                                // Si le scroll est supérieur à to, on arrête de fixer
-                                } else if (self.scrollTop >= self.fixerBottom) {
-                                    self.toBottom();
-
-                                // Sinon, on remet à l'état par défaut
-                                } else {
-                                    self.toReset();
-                                }
-                            }
-
-                            // User callback
-                            if (self.settings.onScroll !== undefined) {
-                                self.settings.onScroll.call({
-                                    Fixer: self,
-                                    event: scrollEvent,
-                                    state: self.state
-                                });
-                            }
-                        }
+                    self.elements.container.find(':input').on('focus blur', function() {
+                        self.elements.container.toggleClass(self.settings.classes.input);
                     });
-                },
-                'touchstart.fixer': function() {
-                    if (eventsReady === false) {
-                        eventsReady = true;
-
-                        self.elements.container.find(':input').on('focus blur', function() {
-                            self.elements.container.toggleClass(self.settings.classes.input);
-                        });
-                    }
                 }
             });
 
@@ -229,6 +189,61 @@
                     elements: self.elements
                 });
             }
+        },
+
+        /**
+         * Gestionnaire de scroll
+         */
+        scrollHandler: function(event) {
+            var self = (event.data === undefined) ? this : event.data.self;
+
+            window.requestAnimationFrame(function() {
+                self.scrollTop = window.pageYOffset;
+
+                // Sensibilité du scroll
+                if ((Math.abs(self.previousScrollTop - self.scrollTop) > self.settings.sensitivity)) {
+
+                    // En mode inverse
+                    if (self.settings.reverse) {
+
+                        // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
+                        if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.fixerTop) {
+                            self.toFixed();
+
+                        // Si le scroll défile normalement, on remet à l'état par défaut
+                        } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.fixerTop) {
+                            self.toReset();
+                        }
+
+                        self.previousScrollTop = self.scrollTop;
+
+                    } else {
+                        // Si le scroll est entre le from/to défini, on fixe
+                        if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
+                            self.toFixed();
+
+                        // Si le scroll est supérieur à to, on arrête de fixer
+                        } else if (self.scrollTop >= self.fixerBottom) {
+                            self.toBottom();
+
+                        // Sinon, on remet à l'état par défaut
+                        } else {
+                            self.toReset();
+                        }
+                    }
+
+                    // User callback
+                    if (self.settings.onScroll !== undefined) {
+                        self.settings.onScroll.call({
+                            Fixer: self,
+                            event: (event.data === undefined) ? event.event : event,
+                            state: self.state
+                        });
+                    }
+                }
+            });
+
+            return self;
         },
 
         /**
@@ -246,6 +261,8 @@
             if (this.settings.onFixed !== undefined) {
                 this.settings.onFixed.call(this);
             }
+
+            return this;
         },
 
         /**
@@ -263,6 +280,8 @@
             if (this.settings.onBottom !== undefined) {
                 this.settings.onBottom.call(this);
             }
+
+            return this;
         },
 
         /**
@@ -282,6 +301,8 @@
             if (this.settings.onReset !== undefined) {
                 this.settings.onReset.call(this);
             }
+
+            return this;
         }
     };
 

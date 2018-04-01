@@ -1,12 +1,7 @@
-/**
- * Fixer
- *
- * @version 2.2 (12/03/2017)
- */
-(function($) {
+(function ($) {
     'use strict';
 
-    $.Fixer = function(element, options) {
+    $.Fixer = function (element, options) {
         // Élements
         this.elements = {
             fixer: element,
@@ -25,10 +20,10 @@
 
         // Init
         if (this.prepareOptions()) {
-            this.init();
+            return this.init();
         }
 
-        return this;
+        return false;
     };
 
     $.Fixer.defaults = {
@@ -60,11 +55,11 @@
          *
          * @return bool
          */
-        prepareOptions: function() {
+        prepareOptions: function () {
             var self = this;
 
             // Classes
-            $.each(self.settings.classes, function(key, value) {
+            $.each(self.settings.classes, function (key, value) {
                 if (typeof value === 'string') {
                     self.settings.classes[key] = value.replace(/{prefix}/, self.settings.classes.prefix);
                 }
@@ -76,7 +71,7 @@
         /**
          * Initialisation
          */
-        init: function() {
+        init: function () {
             // Container
             this.elements.container = (this.settings.container !== undefined && this.settings.container.length) ? this.settings.container : this.elements.fixer.parent();
 
@@ -98,7 +93,7 @@
         /**
          * Polyfill requestAnimationFrame
          */
-        requestAnimationFramePolyfill: function() {
+        requestAnimationFramePolyfill: function () {
             var lastTime = 0;
             var vendorIndex = 0;
             var vendors = ['o', 'ms', 'moz', 'webkit'];
@@ -109,10 +104,10 @@
             }
 
             if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function(callback) {
+                window.requestAnimationFrame = function (callback) {
                     var currTime = new Date().getTime();
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() {
+                    var id = window.setTimeout(function () {
                         callback(currTime + timeToCall);
                     }, timeToCall);
 
@@ -123,7 +118,7 @@
             }
 
             if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function(id) {
+                window.cancelAnimationFrame = function (id) {
                     clearTimeout(id);
                 };
             }
@@ -132,7 +127,7 @@
         /**
          * Détermine le départ du scroll pour fixer l'élement
          */
-        setFixerTop: function() {
+        setFixerTop: function () {
             if (this.settings.from === undefined) {
                 this.fixerTop = parseInt(this.elements.fixer.offset().top);
             } else if (this.settings.from < 0) {
@@ -147,7 +142,7 @@
         /**
          * Détermine la fin du scroll pour arrêter de fixer l'élément
          */
-        setFixerBottom: function() {
+        setFixerBottom: function () {
             if (this.settings.to === undefined) {
                 this.fixerBottom = parseInt(this.elements.container.outerHeight() - this.elements.fixer.outerHeight());
             } else if (this.settings.to < 0) {
@@ -164,7 +159,7 @@
         /**
          * Gestionnaire d'événements
          */
-        eventsHander: function() {
+        eventsHander: function () {
             var self = this;
             var eventsReady = false;
 
@@ -172,11 +167,11 @@
                 $(window).on('scroll.fixer', {self: self}, self.scrollHandler);
             }
 
-            $(window).on('touchstart.fixer', function() {
+            $(window).on('touchstart.fixer', function () {
                 if (eventsReady === false) {
                     eventsReady = true;
 
-                    self.elements.container.find(':input').on('focus blur', function() {
+                    self.elements.container.find(':input').on('focus blur', function () {
                         self.elements.container.toggleClass(self.settings.classes.input);
                     });
                 }
@@ -185,19 +180,21 @@
             // User callback
             if (self.settings.afterEventsHandler !== undefined) {
                 self.settings.afterEventsHandler.call({
-                    Fixer: self,
+                    fixer: self,
                     elements: self.elements
                 });
             }
+
+            return self;
         },
 
         /**
          * Gestionnaire de scroll
          */
-        scrollHandler: function(event) {
-            var self = (event.data === undefined) ? this : event.data.self;
+        scrollHandler: function (event) {
+            var self = (event.data.self !== undefined) ? event.data.self : this;
 
-            window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(function () {
                 self.scrollTop = window.pageYOffset;
 
                 // Sensibilité du scroll
@@ -235,7 +232,7 @@
                     // User callback
                     if (self.settings.onScroll !== undefined) {
                         self.settings.onScroll.call({
-                            Fixer: self,
+                            fixer: self,
                             event: (event.data === undefined) ? event.event : event,
                             state: self.state
                         });
@@ -249,7 +246,7 @@
         /**
          * Fixe l'élément
          */
-        toFixed: function() {
+        toFixed: function () {
             // État
             this.state = 'fixed';
             this.elements.container
@@ -268,7 +265,7 @@
         /**
          * Place l'élément au bas du conteneur
          */
-        toBottom: function() {
+        toBottom: function () {
             // État
             this.state = 'bottom';
             this.elements.container
@@ -287,7 +284,7 @@
         /**
          * Remet l'élément à la normale
          */
-        toReset: function() {
+        toReset: function () {
             // État
             this.elements.container.removeClass(this.settings.classes.fixed);
 
@@ -306,7 +303,7 @@
         }
     };
 
-    $.fn.fixer = function(options) {
+    $.fn.fixer = function (options) {
         return new $.Fixer($(this), options);
     };
 })(jQuery);

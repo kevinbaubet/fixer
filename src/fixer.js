@@ -192,7 +192,7 @@
          * Gestionnaire de scroll
          */
         scrollHandler: function (event) {
-            var self = (event.data.self !== undefined) ? event.data.self : this;
+            var self = (event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
 
             window.requestAnimationFrame(function () {
                 self.scrollTop = window.pageYOffset;

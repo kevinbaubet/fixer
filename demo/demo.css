@@ -9,6 +9,9 @@ body {
     position: relative;
     z-index: 10;
 }
+.page.is-fixed {
+    padding-top: 70px;
+}
 body:after {
     content: "";
     position: fixed;
@@ -48,7 +51,11 @@ h2 {
     width: 960px;
     overflow: hidden;
 }
+.main p {
+    color: #fff;
+}
 ul {
+    margin: 0;
     padding: 0;
 }
 header {
@@ -94,7 +101,6 @@ header li {
 }
 aside {
     float: right;
-    margin-top: 20px;
     width: 20%;
 }
 #aside-block-1-wrapper,
@@ -106,6 +112,9 @@ aside {
     padding: 20px 10%;
     height: 400px;
     background: #fff;
+}
+.aside-block p {
+    color: #000;
 }
 section.is-fixed .aside-block {
     position: fixed;

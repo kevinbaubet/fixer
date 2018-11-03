@@ -4,7 +4,7 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
 ## Initialisation
 
-    var Fixer = $('#element-a-fixer').fixer([options]);
+    var fixer = $('#element-a-fixer').fixer([options]);
 
 
 ## Options
@@ -15,7 +15,6 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | from                              | integer  | undefined            | Hauteur du scroll à partir duquel l'élément sera fixé. Si la valeur n'est pas définie, c'est la position haute de l'élément                                   |
 | to                                | integer  | undefined            | Hauteur du scroll à partir duquel l'élément ne sera plus fixé. Si la valeur n'est pas définie, c'est la hauteur du conteneur - la position haute de l'élément |
 | reverse                           | boolean  | false                | Inverser le fonctionnenemnt pour fixer l'élément. Si true, il faudra remonter la page pour fixer l'élément.                                                   |
-| sensitivity                       | integer  | 8                    | Sensibilité du scroll avant d'effectuer une action. Si proche de 0, il faudra peu de mouvement pour déclencher le fixe de l'élément.                          |
 | scrollerDependency                | boolean  | false                | Permet d'utiliser la dépendance de Scroller. Dans ce cas, c'est Scroller qui doit initialiser le gestionnaire de scroll pour Fixer.                           |
 | classes                           | object   | Voir ci-dessous      | Liste les options ci-dessous                                                                                                                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;prefix    | string   | 'fixer'              | Préfix de classe                                                                                                                                              |
@@ -34,26 +33,25 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
 ## Méthodes
 
-| Méthode        | Arguments | Description                                                |
-|----------------|-----------|------------------------------------------------------------|
-| setFixerTop    | -         | Détermine le départ du scroll pour fixer l'élement         |
-| setFixerBottom | -         | Détermine la fin du scroll pour arrêter de fixer l'élément |
-| toFixed        | -         | Fixe l'élément                                             |
-| toBottom       | -         | Place l'élément au bas du conteneur                        |
-| toReset        | -         | Remet l'élément à la normale                               |
+| Méthode        | Arguments | Description                                                              |
+|----------------|-----------|--------------------------------------------------------------------------|
+| update         | -         | Met à jour les positions de début/fin de scroll par rapport au conteneur |
+| toFixed        | -         | Fixe l'élément                                                           |
+| toBottom       | -         | Place l'élément au bas du conteneur                                      |
+| toReset        | -         | Remet l'élément à la normale                                             |
 
 
 ## Dépendance Scroller
 
-En activant l'option **scrollerDependency**, *Fixer* n'exécutera plus d'événement *scroll* pour fixer un élément. C'est la librairie [Scroller](https://github.com/keverage/scroller) qui devra s'en occuper.
+En activant l'option **scrollerDependency**, *Fixer* n'exécutera plus d'événement *scroll* pour fixer un élément. C'est la librairie [Scroller](https://github.com/kevinbaubet/scroller) qui devra s'en occuper.
 
-    var Fixer = $('#element-a-fixer').fixer({
+    var fixer = $('#element-a-fixer').fixer({
         scrollerDependency: true
     });
 
-    var Scroller = new $.Scroller();
+    var scroller = new $.Scroller();
 
-    Scroller.onScroll(function() {
-        // Appel du gestionnaire de scroll de Fixer en passant en paramètre l'événément scroll
-        Fixer.scrollHandler.call(Fixer, this);
+    scroller.onScroll(function() {
+        // Appel du gestionnaire de scroll de Fixer en passant en paramètre l'événement scroll
+        fixer.scrollHandler.call(fixer, this);
     });

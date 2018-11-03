@@ -30,8 +30,8 @@
         container: undefined,
         from: undefined,
         to: undefined,
+        offset: 0,
         reverse: false,
-        sensitivity: 8,
         scrollerDependency: false,
         classes: {
             prefix: 'fixer',
@@ -80,12 +80,11 @@
             this.elements.fixer.addClass(this.settings.classes.element);
 
             // Fixer element
-            this.setFixerTop();
-            this.setFixerBottom();
+            this.update();
 
             // Event
             this.requestAnimationFramePolyfill();
-            this.eventsHander();
+            this.eventsHandler();
 
             return this;
         },
@@ -125,6 +124,16 @@
         },
 
         /**
+         * Update fixer position
+         */
+        update: function () {
+            this.setFixerTop();
+            this.setFixerBottom();
+
+            return this;
+        },
+
+        /**
          * Détermine le départ du scroll pour fixer l'élement
          */
         setFixerTop: function () {
@@ -135,6 +144,8 @@
             } else {
                 this.fixerTop = parseInt(this.settings.from);
             }
+
+            this.fixerTop -= parseInt(this.settings.offset);
 
             return this;
         },
@@ -159,7 +170,7 @@
         /**
          * Gestionnaire d'événements
          */
-        eventsHander: function () {
+        eventsHandler: function () {
             var self = this;
             var eventsReady = false;
 
@@ -175,6 +186,10 @@
                         self.elements.container.toggleClass(self.settings.classes.input);
                     });
                 }
+            });
+
+            $(window).on('load', function () {
+                self.update();
             });
 
             // User callback
@@ -197,46 +212,42 @@
             window.requestAnimationFrame(function () {
                 self.scrollTop = window.pageYOffset;
 
-                // Sensibilité du scroll
-                if ((Math.abs(self.previousScrollTop - self.scrollTop) > self.settings.sensitivity)) {
+                // En mode inverse
+                if (self.settings.reverse) {
 
-                    // En mode inverse
-                    if (self.settings.reverse) {
+                    // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
+                    if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.fixerTop) {
+                        self.toFixed();
 
-                        // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
-                        if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.fixerTop) {
-                            self.toFixed();
+                    // Si le scroll défile normalement, on remet à l'état par défaut
+                    } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.fixerTop) {
+                        self.toReset();
+                    }
 
-                        // Si le scroll défile normalement, on remet à l'état par défaut
-                        } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.fixerTop) {
-                            self.toReset();
-                        }
+                    self.previousScrollTop = self.scrollTop;
 
-                        self.previousScrollTop = self.scrollTop;
+                } else {
+                    // Si le scroll est entre le from/to défini, on fixe
+                    if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
+                        self.toFixed();
 
+                    // Si le scroll est supérieur à to, on arrête de fixer
+                    } else if (self.scrollTop >= self.fixerBottom) {
+                        self.toBottom();
+
+                    // Sinon, on remet à l'état par défaut
                     } else {
-                        // Si le scroll est entre le from/to défini, on fixe
-                        if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
-                            self.toFixed();
-
-                        // Si le scroll est supérieur à to, on arrête de fixer
-                        } else if (self.scrollTop >= self.fixerBottom) {
-                            self.toBottom();
-
-                        // Sinon, on remet à l'état par défaut
-                        } else {
-                            self.toReset();
-                        }
+                        self.toReset();
                     }
+                }
 
-                    // User callback
-                    if (self.settings.onScroll !== undefined) {
-                        self.settings.onScroll.call({
-                            fixer: self,
-                            event: (event.data === undefined) ? event.event : event,
-                            state: self.state
-                        });
-                    }
+                // User callback
+                if (self.settings.onScroll !== undefined) {
+                    self.settings.onScroll.call({
+                        fixer: self,
+                        event: (event.data === undefined) ? event.event : event,
+                        state: self.state
+                    });
                 }
             });
 
@@ -247,17 +258,18 @@
          * Fixe l'élément
          */
         toFixed: function () {
+            // User callback
+            if (this.settings.onFixed !== undefined && this.state !== 'fixed') {
+                this.settings.onFixed.call(this);
+            }
+
             // État
-            this.state = 'fixed';
             this.elements.container
                 .removeClass(this.settings.classes.reset)
                 .removeClass(this.settings.classes.bottom)
                 .addClass(this.settings.classes.fixed);
 
-            // User callback
-            if (this.settings.onFixed !== undefined) {
-                this.settings.onFixed.call(this);
-            }
+            this.state = 'fixed';
 
             return this;
         },
@@ -266,17 +278,18 @@
          * Place l'élément au bas du conteneur
          */
         toBottom: function () {
+            // User callback
+            if (this.settings.onBottom !== undefined && this.state !== 'bottom') {
+                this.settings.onBottom.call(this);
+            }
+
             // État
-            this.state = 'bottom';
             this.elements.container
                 .removeClass(this.settings.classes.reset)
                 .removeClass(this.settings.classes.fixed)
                 .addClass(this.settings.classes.bottom);
 
-            // User callback
-            if (this.settings.onBottom !== undefined) {
-                this.settings.onBottom.call(this);
-            }
+            this.state = 'bottom';
 
             return this;
         },
@@ -285,6 +298,11 @@
          * Remet l'élément à la normale
          */
         toReset: function () {
+            // User callback
+            if (this.settings.onReset !== undefined && this.state !== 'default') {
+                this.settings.onReset.call(this);
+            }
+
             // État
             this.elements.container.removeClass(this.settings.classes.fixed);
 
@@ -293,11 +311,6 @@
             }
             
             this.state = 'default';
-
-            // User callback
-            if (this.settings.onReset !== undefined) {
-                this.settings.onReset.call(this);
-            }
 
             return this;
         }

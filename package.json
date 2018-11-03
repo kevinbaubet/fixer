@@ -1,6 +1,6 @@
 {
   "name": "fixer",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "main": "./dist/fixer.min.js",
   "repository": "https://github.com/kevinbaubet/fixer.git",
   "author": "Kévin Baubet <contact@kevinbaubet.fr>",
@@ -9,14 +9,14 @@
     "jquery": ">=1.7.0"
   },
   "devDependencies": {
-    "autoprefixer": "^9.1.5",
+    "autoprefixer": "^9.3.1",
     "gulp": "^3.9.1",
     "gulp-uglify": "^3.0.1",
     "gulp-load-plugins": "^1.5.0",
     "gulp-pixrem": "^1.0.0",
     "gulp-postcss": "^8.0.0",
     "gulp-rename": "^1.4.0",
-    "gulp-sass": "^4.0.1",
+    "gulp-sass": "^4.0.2",
     "postcss-pxtorem": "^4.0.1"
   },
   "sass": {
@@ -24,8 +24,8 @@
   },
   "autoprefixer": {
     "browsers": [
-      "last 3 versions",
-      "IE 10"
+      "last 2 versions",
+      "IE 11"
     ]
   },
   "pxtorem": {

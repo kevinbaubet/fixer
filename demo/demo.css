@@ -129,3 +129,75 @@ section.is-bottom .aside-block {
     padding: 20px 19px;
     width: 154px;
 }
+
+/* Demo complex */
+.demo-complex .map {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    float: left;
+    width: 78%;
+    min-height: 340px;
+    background: #fff;
+}
+.demo-complex .map-inner {
+    padding: 20px 2%;
+}
+.demo-complex.is-fixed .map {
+    position: fixed;
+    top: 0;
+    width: 748px;
+}
+.demo-complex.is-bottom .map {
+    position: absolute;
+    bottom: 298px;
+}
+.demo-complex .map p {
+    color: #303748;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+.demo-complex .search-result,
+.demo-complex #search-submit.is-hidden {
+    display: none;
+}
+.demo-complex .search-result.is-showed {
+    display: block;
+}
+.demo-complex .list-result-wrapper {
+    float: none;
+    width: auto;
+    margin: 40px 0;
+}
+.demo-complex .list-result-wrapper li {
+    padding: 0;
+}
+.demo-complex .aside-block {
+    padding: 0;
+    height: auto;
+    min-height: 340px;
+}
+.demo-complex .block-inner {
+    padding: 20px 10%;
+}
+.demo-complex .btn {
+    width: 100%;
+    padding: 10px 20px;
+    background: #ff5a60;
+    border: 0;
+    color: #fff;
+    font-weight: bold;
+    font-size: .9em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: .2s;
+}
+.demo-complex .btn:hover {
+    background-color: #303748;
+}
+.demo-complex .content-bottom {
+    clear: both;
+    overflow: hidden;
+    padding: 60px 0;
+}

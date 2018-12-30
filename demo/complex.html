@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Fixer complex example</title>
+        <link rel="stylesheet" href="demo.css" />
+
+        <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+
+        <script src="../src/fixer3.js"></script>
+        <script>
+            jQuery(function ($) {
+                $.FixerComplexExample = function () {
+                    this.elements = {};
+                    this.fixer = undefined;
+
+                    this.pager = {
+                        itemPerPage: 10,
+                        currentOffset: 0
+                    };
+
+                    this.states = {
+                        result: false
+                    };
+                    this.sizes = {
+                        map: {},
+                        sidebar: {},
+                        window: {}
+                    };
+                    this.deviceDetect = undefined;
+
+                    return this.init();
+                };
+
+                $.FixerComplexExample.prototype = {
+                    /**
+                     * Main init
+                     */
+                    init: function () {
+                        this.getElements();
+                        this.updateSizes();
+                        this.libsHandler();
+                        this.initMap();
+                        this.eventsHandler();
+
+                        return this;
+                    },
+
+                    /**
+                     * Main update
+                     */
+                    update: function () {
+                        this.updateSizes();
+                        this.updateMap();
+
+                        return this;
+                    },
+
+                    /**
+                     * Get DOM elements
+                     */
+                    getElements: function () {
+                        this.elements = {
+                            mapContainer: $('#map-container'),
+                            sidebarContainer: $('#sidebar-container'),
+                            searchSubmit: $('#search-submit'),
+                            searchMore: $('#list-result-more-submit')
+                        };
+                        this.elements.map = this.elements.mapContainer.find('p');
+                        this.elements.searchResult = this.elements.sidebarContainer.find('div.search-result');
+                        this.elements.searchResultList = this.elements.sidebarContainer.find('ul.list-result-wrapper');
+
+                        return this;
+                    },
+
+                    /**
+                     * Libraries
+                     */
+                    libsHandler: function () {
+                        this.fixer = this.elements.mapContainer.fixer({
+                            resizeEvent: false
+                        });
+                        this.fixer.setStart(this.elements.sidebarContainer.offset().top);
+
+                        return this;
+                    },
+
+                    /**
+                     * Map handlers
+                     */
+                    initMap: function () {
+                        this.elements.map.html('MAP : ' + this.sizes.map.width + ' x ' + this.sizes.map.height + 'px');
+
+                        return this;
+                    },
+                    // Update sizes/fixer
+                    updateMap: function () {
+                        if (this.sizes.sidebar.height > this.sizes.window.height) {
+                            this.fixer.fixed();
+                            this.elements.mapContainer.height('100vh');
+                        } else {
+                            this.elements.mapContainer.height(this.sizes.sidebar.height);
+                        }
+
+                        this.elements.map.html('MAP : ' + this.sizes.map.width + ' x ' + this.sizes.map.height + 'px');
+                        this.fixer.setEnd(this.sizes.sidebar.height - this.sizes.window.height);
+                    },
+
+                    /**
+                     * Events handlers
+                     */
+                    eventsHandler: function () {
+                        this.elements.searchSubmit.on('click', {self: this}, this.searchSubmitHandler);
+                        this.elements.searchMore.on('click', {self: this}, this.searchMoreHandler);
+                        $(window).on('resize', {self: this}, this.resizeHandler);
+
+                        return this;
+                    },
+                    searchSubmitHandler: function (event) {
+                        let self = (event !== undefined) ? event.data.self : this;
+
+                        if (self.states.result) {
+                            self.states.result = false;
+                            self.pager.currentOffset = 0;
+                            self.elements.searchResultList.empty();
+                            self.elements.searchSubmit.html('Search');
+                            self.elements.searchResult.removeClass('is-showed');
+                            self.update();
+
+                        } else {
+                            self.states.result = true;
+                            self.elements.searchSubmit.html('New search');
+                            self.elements.searchResult.addClass('is-showed');
+
+                            self.getResults(function () {
+                                self.update();
+                            });
+                        }
+
+                        return self;
+                    },
+                    searchMoreHandler: function (event) {
+                        let self = (event !== undefined) ? event.data.self : this;
+
+                        self.getResults(function () {
+                            self.update();
+                        });
+
+                        return self;
+                    },
+                    getResults: function (done) {
+                        let self = this;
+
+                        $.ajax('ajax.php', {
+                            dataType: 'json',
+                            data: {
+                                rows: self.pager.itemPerPage,
+                                offset: self.pager.currentOffset
+                            }
+                        }).done(function (result) {
+                            if (result.length) {
+                                $.each(result, function (i, item) {
+                                    $('<li>', {
+                                        html: item
+                                    }).appendTo(self.elements.searchResultList);
+                                });
+
+                                self.pager.currentOffset += self.pager.itemPerPage;
+
+                                if (done !== undefined && typeof done === 'function') {
+                                    done();
+                                }
+                            }
+                        });
+
+                        return self;
+                    },
+                    resizeHandler: function (event) {
+                        let self = (event !== undefined) ? event.data.self : this;
+
+                        self.update();
+                    },
+
+                    /**
+                     * Get size utils
+                     *
+                     * @returns {width: *, height: *}
+                     */
+                    getMapSize: function () {
+                        return {
+                            width: parseInt(this.elements.mapContainer.width()),
+                            height: parseInt(this.elements.mapContainer.height())
+                        };
+                    },
+                    getWindowSize: function () {
+                        return {
+                            width: parseInt(window.innerWidth),
+                            height: parseInt(window.innerHeight)
+                        };
+                    },
+                    getSidebarSize: function () {
+                        return {
+                            width: parseInt(this.elements.sidebarContainer.width()),
+                            height: parseInt(this.elements.sidebarContainer.height())
+                        };
+                    },
+                    updateSizes: function () {
+                        this.sizes.map = this.getMapSize();
+                        this.sizes.sidebar = this.getSidebarSize();
+                        this.sizes.window = this.getWindowSize();
+
+                        return this;
+                    }
+                };
+            });
+            
+            jQuery(document).ready(function ($) {
+                new $.FixerComplexExample();
+            });
+        </script>
+    </head>
+    <body class="demo-complex">
+        <div class="page">
+            <div class="main">
+                <h1>Fixer</h1>
+
+                <div id="map-container" class="map">
+                    <div class="map-inner">
+                        <p>MAP</p>
+                    </div>
+                </div>
+
+                <aside class="aside-block" id="sidebar-container">
+                    <div class="block-inner">
+                        <button id="search-submit" class="btn">Search</button>
+
+                        <div class="search-result">
+                            <ul class="list-result-wrapper"></ul>
+
+                            <button id="list-result-more-submit" class="btn">Show more</button>
+                        </div>
+                    </div>
+                </aside>
+
+
+                <div class="content-bottom">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur dolorem fugit magnam magni, nam quis totam. Alias dolor eaque harum in, magnam magni perferendis placeat, quasi, qui temporibus voluptate voluptates.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur dolorem fugit magnam magni, nam quis totam. Alias dolor eaque harum in, magnam magni perferendis placeat, quasi, qui temporibus voluptate voluptates.</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur dolorem fugit magnam magni, nam quis totam. Alias dolor eaque harum in, magnam magni perferendis placeat, quasi, qui temporibus voluptate voluptates.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

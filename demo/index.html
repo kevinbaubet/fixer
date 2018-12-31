@@ -7,19 +7,23 @@
 
         <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 
-        <script src="../src/fixer.js"></script>
+        <script src="../src/fixer3.js"></script>
         <script>
             jQuery(document).ready(function ($) {
                 $('header').fixer({
-                    from: 300,
-                    reverse: true
+                    start: 300,
+                    reverse: true,
+                    debug: true
                 });
 
+
                 $('#aside-block-1').fixer({
-                    offset: 70
+                    container: $('#aside-block-1-wrapper'),
+                    offset: 55
                 });
                 $('#aside-block-2').fixer({
-                    offset: 70
+                    container: $('#aside-block-2-wrapper'),
+                    offset: 55
                 });
             });
         </script>
@@ -94,5 +98,13 @@
                 </aside>
             </div>
         </div>
+
+        <footer>
+            <ul>
+                <li><a href="index.html">Default</a></li>
+                <li><a href="complex.html">Complex</a></li>
+                <li><a href="events.html">Custom events</a></li>
+            </ul>
+        </footer>
     </body>
 </html>

@@ -27,7 +27,6 @@
                         sidebar: {},
                         window: {}
                     };
-                    this.deviceDetect = undefined;
 
                     return this.init();
                 };
@@ -39,7 +38,7 @@
                     init: function () {
                         this.getElements();
                         this.updateSizes();
-                        this.libsHandler();
+                        this.fixerHandler();
                         this.initMap();
                         this.eventsHandler();
 
@@ -76,33 +75,46 @@
                     /**
                      * Libraries
                      */
-                    libsHandler: function () {
-                        this.fixer = this.elements.mapContainer.fixer({
-                            resizeEvent: false
-                        });
-                        this.fixer.setStart(this.elements.sidebarContainer.offset().top);
+                    fixerHandler: function () {
+                        let self = this;
 
-                        return this;
+                        self.fixer = self.elements.mapContainer.fixer({
+                            autoUpdate: false,
+                            onResize: function () {
+                                this.fixer.setState('default');
+                                self.update();
+                            },
+                            onChangeState: function () {
+                                self.elements.map.html('Fixed element: ' + this.state);
+                            },
+                            debug: true
+                        });
+
+                        self.fixer.setStart(self.elements.sidebarContainer.offset().top);
+
+                        return self;
                     },
 
                     /**
                      * Map handlers
                      */
                     initMap: function () {
-                        this.elements.map.html('MAP : ' + this.sizes.map.width + ' x ' + this.sizes.map.height + 'px');
+                        this.elements.map.html('Fixed element: ' + this.fixer.getState());
 
                         return this;
                     },
                     // Update sizes/fixer
                     updateMap: function () {
                         if (this.sizes.sidebar.height > this.sizes.window.height) {
-                            this.fixer.fixed();
+                            if (this.fixer.getState() !== 'default') {
+                                this.fixer.fixed();
+                            }
                             this.elements.mapContainer.height('100vh');
+
                         } else {
                             this.elements.mapContainer.height(this.sizes.sidebar.height);
                         }
 
-                        this.elements.map.html('MAP : ' + this.sizes.map.width + ' x ' + this.sizes.map.height + 'px');
                         this.fixer.setEnd(this.sizes.sidebar.height - this.sizes.window.height);
                     },
 
@@ -112,7 +124,6 @@
                     eventsHandler: function () {
                         this.elements.searchSubmit.on('click', {self: this}, this.searchSubmitHandler);
                         this.elements.searchMore.on('click', {self: this}, this.searchMoreHandler);
-                        $(window).on('resize', {self: this}, this.resizeHandler);
 
                         return this;
                     },
@@ -175,11 +186,6 @@
 
                         return self;
                     },
-                    resizeHandler: function (event) {
-                        let self = (event !== undefined) ? event.data.self : this;
-
-                        self.update();
-                    },
 
                     /**
                      * Get size utils
@@ -226,7 +232,7 @@
 
                 <div id="map-container" class="map">
                     <div class="map-inner">
-                        <p>MAP</p>
+                        <p>Fixed element</p>
                     </div>
                 </div>
 
@@ -250,5 +256,13 @@
                 </div>
             </div>
         </div>
+
+        <footer>
+            <ul>
+                <li><a href="index.html">Default</a></li>
+                <li><a href="complex.html">Complex</a></li>
+                <li><a href="events.html">Custom events</a></li>
+            </ul>
+        </footer>
     </body>
 </html>

@@ -34,7 +34,9 @@
         reverse: false,
         scrollEvent: true,
         resizeEvent: true,
+        resizeTimeout: 100,
         autoLoad: true,
+        autoUpdate: true,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
@@ -51,7 +53,7 @@
         onBottom: undefined,
         onReset: undefined,
         onChangeState: undefined,
-        debug: true
+        debug: false
     };
 
     $.Fixer.prototype = {
@@ -66,7 +68,7 @@
             // Container
             self.elements.container = (self.settings.container !== undefined && self.settings.container.length) ? self.settings.container : $('body');
 
-            // From/to
+            // Start/End
             self.setStart(self.settings.start);
             self.setEnd(self.settings.end);
 
@@ -98,12 +100,9 @@
          * Initialisation
          */
         init: function () {
-            // Add classes
             this.elements.container.addClass(this.settings.classes.container);
             this.elements.fixer.addClass(this.settings.classes.element);
 
-            // Event
-            // this.requestAnimationFramePolyfill();
             this.eventsHandler();
 
             return this;
@@ -113,52 +112,17 @@
          * Destruction de Fixer
          */
         destroy: function () {
-            let self = this;
+            this.reset();
+            this.setState('default');
+            this.elements.container.removeClass(this.settings.classes.container);
+            this.elements.fixer.removeClass(this.settings.classes.element);
+            $(window).off('.' + this.settings.classes.prefix);
 
-            self.state = 'default';
-            self.reset();
-
-            $(window).off('.' + self.settings.classes.prefix);
-
-            return self;
+            return this;
         },
 
         /**
-         * Polyfill requestAnimationFrame
-         */
-        requestAnimationFramePolyfill: function () {
-            var lastTime = 0;
-            var vendorIndex = 0;
-            var vendors = ['o', 'ms', 'moz', 'webkit'];
-
-            for (vendorIndex = 0; vendorIndex < vendors.length && !window.requestAnimationFrame; ++vendorIndex) {
-                window.requestAnimationFrame = window[vendors[vendorIndex] + 'RequestAnimationFrame'];
-                window.cancelAnimationFrame = window[vendors[vendorIndex] + 'CancelAnimationFrame'] || window[vendors[vendorIndex] + 'CancelRequestAnimationFrame'];
-            }
-
-            if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function (callback) {
-                    var currTime = new Date().getTime();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function () {
-                        callback(currTime + timeToCall);
-                    }, timeToCall);
-
-                    lastTime = currTime + timeToCall;
-
-                    return id;
-                };
-            }
-
-            if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function (id) {
-                    clearTimeout(id);
-                };
-            }
-        },
-
-        /**
-         * Détermine le départ du scroll pour fixer l'élement
+         * Set start position
          */
         setStart: function (pos) {
             if (pos !== undefined) {
@@ -168,18 +132,28 @@
                 this.start = parseInt(this.elements.fixer.offset().top);
             }
 
+            if (this.settings.offset) {
+                this.start -= parseInt(this.settings.offset);
+            }
+
             if (this.settings.debug) {
-                console.log('start: ' + this.start);
+                console.log('start: ' + this.getStart());
             }
 
             return this;
         },
+
+        /**
+         * Get start position
+         *
+         * @returns int
+         */
         getStart: function () {
             return this.start;
         },
 
         /**
-         * Détermine la fin du scroll pour arrêter de fixer l'élément
+         * Set end position
          */
         setEnd: function (pos, addStart = true) {
             if (pos !== undefined) {
@@ -193,19 +167,52 @@
                 this.end += this.getStart();
             }
 
+            if (this.settings.offset) {
+                this.end -= parseInt(this.settings.offset);
+            }
+
             if (this.settings.debug) {
-                console.log('end: ' + this.end);
+                console.log('end: ' + this.getEnd());
             }
 
             return this;
         },
+
+        /**
+         * Get end position
+         *
+         * @returns int
+         */
         getEnd: function () {
             return this.end;
         },
 
+        /**
+         * Set current state information
+         */
+        setState: function (state) {
+            this.state = state;
+
+            return this;
+        },
+
+        /**
+         * Get current state
+         *
+         * @returns string (default, fixed, bottom)
+         */
+        getState: function () {
+            return this.state;
+        },
+
+        /**
+         * Update positions
+         */
         update: function () {
             this.setStart();
             this.setEnd();
+
+            return this;
         },
 
         /**
@@ -234,7 +241,7 @@
             }
 
             if (self.settings.resizeEvent) {
-                $(window).on('resize.' + self.settings.classes.prefix, {self: self}, self.resizeHandler);
+                $(window).on('resize.' + self.settings.classes.prefix + ' orientationchange.' + self.settings.classes.prefix, {self: self}, self.resizeHandler);
             }
 
             // User callback
@@ -249,7 +256,9 @@
         },
 
         /**
-         * Gestionnaire de scroll
+         * Event scroll
+         *
+         * @param event
          */
         scrollHandler: function (event) {
             let self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
@@ -257,9 +266,8 @@
             window.requestAnimationFrame(function () {
                 self.scrollTop = window.pageYOffset;
 
-                // En mode inverse
+                // Reverse mode
                 if (self.settings.reverse) {
-
                     // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
                     if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.getStart()) {
                         self.fixed();
@@ -272,7 +280,7 @@
                     self.previousScrollTop = self.scrollTop;
 
                 } else {
-                    // Si le scroll est entre le from/to défini, on fixe
+                    // Si le scroll est entre le start/end défini, on fixe
                     if (self.scrollTop > self.getStart() && self.scrollTop <= self.getEnd()) {
                         self.fixed();
 
@@ -291,7 +299,7 @@
                     self.settings.onScroll.call({
                         fixer: self,
                         event: (event.data === undefined) ? event.event : event,
-                        state: self.state
+                        state: self.getState()
                     });
                 }
             });
@@ -299,35 +307,60 @@
             return self;
         },
 
+        /**
+         * Event resize
+         *
+         * @param event
+         */
         resizeHandler: function (event) {
             let self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
+            let timeout = undefined;
 
-            self.update();
+            clearTimeout(timeout);
+
+            timeout = setTimeout(function () {
+                // Update positions
+                if (self.settings.autoUpdate) {
+                    self.update();
+                }
+
+                // User callback
+                if (self.settings.onResize !== undefined) {
+                    self.settings.onResize.call({
+                        fixer: self,
+                        event: (event.data === undefined) ? event.event : event,
+                        start: self.getStart(),
+                        end: self.getEnd()
+                    });
+                }
+            }, self.settings.resizeTimeout);
+
+            return self;
         },
 
         /**
-         * Fixe l'élément
+         * Stick element
          */
         fixed: function () {
-            if (this.state !== 'fixed') {
+            if (this.getState() !== 'fixed') {
                 // User callback
                 if (this.settings.onFixed !== undefined) {
                     this.settings.onFixed.call(this);
                 }
 
-                // État
+                // States
                 this.elements.container
                     .removeClass(this.settings.classes.reset)
                     .removeClass(this.settings.classes.bottom)
                     .addClass(this.settings.classes.fixed);
 
-                this.state = 'fixed';
+                this.setState('fixed');
 
                 // User callback
                 if (this.settings.onChangeState !== undefined) {
                     this.settings.onChangeState.call({
                         fixer: this,
-                        state: this.state
+                        state: this.getState()
                     });
                 }
             }
@@ -336,28 +369,28 @@
         },
 
         /**
-         * Place l'élément à la position de fin
+         * Set element to bottom of the container
          */
         bottom: function () {
-            if (this.state !== 'bottom') {
+            if (this.getState() !== 'bottom') {
                 // User callback
                 if (this.settings.onBottom !== undefined) {
                     this.settings.onBottom.call(this);
                 }
 
-                // État
+                // States
                 this.elements.container
                     .removeClass(this.settings.classes.reset)
                     .removeClass(this.settings.classes.fixed)
                     .addClass(this.settings.classes.bottom);
 
-                this.state = 'bottom';
+                this.setState('bottom');
 
                 // User callback
                 if (this.settings.onChangeState !== undefined) {
                     this.settings.onChangeState.call({
                         fixer: this,
-                        state: this.state
+                        state: this.getState()
                     });
                 }
             }
@@ -366,29 +399,29 @@
         },
 
         /**
-         * Remet l'élément à la normale
+         * Reset element
          */
         reset: function () {
-            if (this.state !== 'default') {
+            if (this.getState() !== 'default') {
                 // User callback
                 if (this.settings.onReset !== undefined) {
                     this.settings.onReset.call(this);
                 }
 
-                // État
+                // States
                 this.elements.container.removeClass(this.settings.classes.fixed);
 
-                if (this.state === 'fixed') {
+                if (this.getState() === 'fixed') {
                     this.elements.container.addClass(this.settings.classes.reset);
                 }
 
-                this.state = 'default';
+                this.setState('default');
 
                 // User callback
                 if (this.settings.onChangeState !== undefined) {
                     this.settings.onChangeState.call({
                         fixer: this,
-                        state: this.state
+                        state: this.getState()
                     });
                 }
             }

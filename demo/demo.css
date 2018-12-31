@@ -8,9 +8,7 @@ body {
 .page {
     position: relative;
     z-index: 10;
-}
-.page.is-fixed {
-    padding-top: 70px;
+    padding-top: 40px;
 }
 body:after {
     content: "";
@@ -59,16 +57,26 @@ ul {
     padding: 0;
 }
 header {
+    position: absolute;
+    z-index: 5;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     height: 60px;
-    transition: .4s;
+    transition: background-color .4s;
 }
 header p {
     float: left;
+    color: #fff;
+}
+header ul {
+    margin: 3px 0;
 }
 header li {
     float: left;
     display: inline;
     margin: 12px 0 0 25px;
+    color: #fff;
 }
 .is-fixed header {
     position: fixed;
@@ -76,8 +84,13 @@ header li {
     left: 0;
     z-index: 5;
     width: 100%;
+    color: #333;
     background: #fff;
     box-shadow: 0 5px 21px rgba(0, 0, 0, .17);
+    transform: none;
+}
+.is-fixed header * {
+    color: inherit;
 }
 
 .link {
@@ -112,6 +125,7 @@ aside {
     padding: 20px 10%;
     height: 400px;
     background: #fff;
+    overflow: hidden;
 }
 .aside-block p {
     color: #000;
@@ -128,6 +142,29 @@ section.is-bottom .aside-block {
     bottom: 0;
     padding: 20px 19px;
     width: 154px;
+}
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, .5);
+}
+footer ul {
+    display: flex;
+    justify-content: center;
+}
+footer li {
+    list-style: none;
+}
+footer a {
+    display: block;
+    padding: 10px;
+    color: #303748;
+}
+footer a:hover {
+    text-decoration: none;
 }
 
 /* Demo complex */

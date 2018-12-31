@@ -2,24 +2,39 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Fixer with Scroller dependency</title>
+        <title>Fixer with custom events</title>
         <link rel="stylesheet" href="demo.css" />
 
         <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 
+        <!-- @see https://github.com/kevinbaubet/scroller -->
         <script src="../../scroller/src/scroller.js"></script>
-        <script src="../src/fixer.js"></script>
+
+        <!-- @see https://github.com/kevinbaubet/devicedetect -->
+        <script src="../../devicedetect/src/devicedetect.js"></script>
+
+        <script src="../src/fixer3.js"></script>
         <script>
             jQuery(document).ready(function ($) {
-                var fixer = $('header').fixer({
-                    from: 300,
-                    scrollerDependency: true
+                let fixer = $('header').fixer({
+                    start: 300,
+                    scrollEvent: false,
+                    resizeEvent: false,
+                    debug: true
                 });
 
-                var scroller = new $.Scroller();
+                let scroller = new $.Scroller();
+                let deviceDetect = new $.DeviceDetect();
 
                 scroller.onScroll(function () {
                     fixer.scrollHandler.call(fixer, this);
+
+                    // Other actions
+                });
+                deviceDetect.onResize(function () {
+                    fixer.resizeHandler.call(fixer, this);
+
+                    // Other actions
                 });
             });
         </script>
@@ -79,5 +94,13 @@
                 </div>
             </div>
         </div>
+
+        <footer>
+            <ul>
+                <li><a href="index.html">Default</a></li>
+                <li><a href="complex.html">Complex</a></li>
+                <li><a href="events.html">Custom events</a></li>
+            </ul>
+        </footer>
     </body>
 </html>

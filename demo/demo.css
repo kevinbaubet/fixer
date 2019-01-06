@@ -188,7 +188,7 @@ footer a:hover {
 }
 .demo-complex.is-bottom .map {
     position: absolute;
-    bottom: 298px;
+    bottom: 0;
 }
 .demo-complex .map p {
     color: #303748;

@@ -25,7 +25,8 @@
                     this.sizes = {
                         map: {},
                         sidebar: {},
-                        window: {}
+                        window: {},
+                        bottom: {}
                     };
 
                     return this.init();
@@ -51,6 +52,7 @@
                     update: function () {
                         this.updateSizes();
                         this.updateMap();
+                        this.updateFixer();
 
                         return this;
                     },
@@ -63,7 +65,8 @@
                             mapContainer: $('#map-container'),
                             sidebarContainer: $('#sidebar-container'),
                             searchSubmit: $('#search-submit'),
-                            searchMore: $('#list-result-more-submit')
+                            searchMore: $('#list-result-more-submit'),
+                            bottomContent: $('#content-bottom')
                         };
                         this.elements.map = this.elements.mapContainer.find('p');
                         this.elements.searchResult = this.elements.sidebarContainer.find('div.search-result');
@@ -93,6 +96,13 @@
                         self.fixer.setStart(self.elements.sidebarContainer.offset().top);
 
                         return self;
+                    },
+                    updateFixer: function () {
+                        if (this.sizes.bottom.height !== undefined) {
+                            this.fixer.elements.fixer.css('margin-bottom', this.sizes.bottom.height);
+                        }
+
+                        return this;
                     },
 
                     /**
@@ -210,10 +220,16 @@
                             height: parseInt(this.elements.sidebarContainer.height())
                         };
                     },
+                    getBottomSize: function () {
+                        return {
+                            height: parseInt(this.elements.bottomContent.outerHeight(true))
+                        };
+                    },
                     updateSizes: function () {
                         this.sizes.map = this.getMapSize();
                         this.sizes.sidebar = this.getSidebarSize();
                         this.sizes.window = this.getWindowSize();
+                        this.sizes.bottom = this.getBottomSize();
 
                         return this;
                     }
@@ -223,6 +239,7 @@
             jQuery(document).ready(function ($) {
                 new $.FixerComplexExample();
             });
+
         </script>
     </head>
     <body class="demo-complex">
@@ -249,7 +266,7 @@
                 </aside>
 
 
-                <div class="content-bottom">
+                <div id="content-bottom" class="content-bottom">
                     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur dolorem fugit magnam magni, nam quis totam. Alias dolor eaque harum in, magnam magni perferendis placeat, quasi, qui temporibus voluptate voluptates.</p>
                     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur dolorem fugit magnam magni, nam quis totam. Alias dolor eaque harum in, magnam magni perferendis placeat, quasi, qui temporibus voluptate voluptates.</p>
                     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur dolorem fugit magnam magni, nam quis totam. Alias dolor eaque harum in, magnam magni perferendis placeat, quasi, qui temporibus voluptate voluptates.</p>

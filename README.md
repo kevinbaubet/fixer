@@ -4,17 +4,17 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
 ## Initialisation
 
-    var fixer = $('#element-a-fixer').fixer([options]);
+    var fixer = $('#element').fixer([options]);
 
 
 ## Options
 
 | Option                            | Type     | Valeur par défaut    | Description                                                                                                                                                   |
 |-----------------------------------|----------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| container                         | object   | undefined            | Conteneur de l'élément à fixer. Si la valeur n'est pas définie, c'est le <body> qui sera utilisé                                                              |
+| container                         | object   | undefined            | Conteneur de l'élément à fixer. Si la valeur n'est pas définie, c'est le *body* qui sera utilisé                                                              |
 | start                             | integer  | undefined            | Hauteur du scroll à partir duquel l'élément sera fixé à partir du conteneur. Si la valeur n'est pas définie, c'est la position haute de l'élément à fixer     |
 | end                               | integer  | undefined            | Hauteur du scroll à partir duquel l'élément ne sera plus fixé. Si la valeur n'est pas définie, c'est la hauteur du conteneur - la position haute de l'élément |
-| offset                            | integer  | undefined            | Décalage des limites pour fixer                                                                                                                               |
+| offset                            | integer  | 0                    | Décalage des limites pour fixer                                                                                                                               |
 | reverse                           | boolean  | false                | Inverser le fonctionnenemnt pour fixer l'élément. Si true, il faudra remonter la page pour fixer l'élément                                                    |
 | scrollEvent                       | boolean  | true                 | Activer/Désactiver l'événenement de scroll. Voir section "Désactivation des événements"                                                                       |
 | resizeEvent                       | boolean  | true                 | Activer/Désactiver l'événenement de resize. Voir section "Désactivation des événements"                                                                       |
@@ -61,7 +61,7 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
 Il est possible de désactiver les événements de *scroll* et de *resize* pour les gérer d'une autre façon.
 
-    var fixer = $('#element-a-fixer').fixer({
+    var fixer = $('#element').fixer({
         scrollEvent: false,
         resizeEvent: false
     });

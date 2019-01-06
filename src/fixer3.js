@@ -122,15 +122,20 @@
         },
 
         /**
+         * Update positions
+         */
+        update: function () {
+            this.setStart();
+            this.setEnd();
+
+            return this;
+        },
+
+        /**
          * Set start position
          */
         setStart: function (pos) {
-            if (pos !== undefined) {
-                this.start = parseInt(pos);
-
-            } else {
-                this.start = parseInt(this.elements.fixer.offset().top);
-            }
+            this.start = parseInt((pos !== undefined) ? this.elements.container.offset().top + pos : this.elements.fixer.offset().top);
 
             if (this.settings.offset) {
                 this.start -= parseInt(this.settings.offset);
@@ -155,13 +160,9 @@
         /**
          * Set end position
          */
-        setEnd: function (pos, addStart = true) {
-            if (pos !== undefined) {
-                this.end = parseInt(pos);
-
-            } else {
-                this.end = parseInt(this.elements.container.height() - this.elements.fixer.height());
-            }
+        setEnd: function (pos, addStart) {
+            addStart = addStart || true;
+            this.end = parseInt((pos !== undefined) ? pos : this.elements.container.height() - this.elements.fixer.height());
 
             if (addStart !== undefined && addStart === true) {
                 this.end += this.getStart();
@@ -206,13 +207,15 @@
         },
 
         /**
-         * Update positions
+         * Get current scroll top position
+         *
+         * @param prev bool get the previous value of scroll top
+         * @return int
          */
-        update: function () {
-            this.setStart();
-            this.setEnd();
+        getScrollTop: function (prev) {
+            prev = prev || false;
 
-            return this;
+            return (prev) ? this.previousScrollTop : this.scrollTop;
         },
 
         /**
@@ -269,19 +272,19 @@
                 // Reverse mode
                 if (self.settings.reverse) {
                     // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
-                    if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.getStart()) {
+                    if (self.getScrollTop('previous') > self.getScrollTop() && self.getScrollTop() >= self.getStart()) {
                         self.fixed();
 
                     // Si le scroll défile normalement, on remet à l'état par défaut
-                    } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.getStart()) {
+                    } else if (self.getScrollTop('previous') < self.getScrollTop() || self.getScrollTop() < self.getStart()) {
                         self.reset();
                     }
 
-                    self.previousScrollTop = self.scrollTop;
+                    self.previousScrollTop = self.getScrollTop();
 
                 } else {
                     // Si le scroll est entre le start/end défini, on fixe
-                    if (self.scrollTop > self.getStart() && self.scrollTop <= self.getEnd()) {
+                    if (self.getScrollTop() > self.getStart() && self.getScrollTop() <= self.getEnd()) {
                         self.fixed();
 
                     // Si le scroll est supérieur à to, on arrête de fixer

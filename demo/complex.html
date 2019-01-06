@@ -87,7 +87,7 @@
                             onChangeState: function () {
                                 self.elements.map.html('Fixed element: ' + this.state);
                             },
-                            debug: true
+                            debug: false
                         });
 
                         self.fixer.setStart(self.elements.sidebarContainer.offset().top);
@@ -260,7 +260,7 @@
         <footer>
             <ul>
                 <li><a href="index.html">Default</a></li>
-                <li><a href="complex.html">Complex</a></li>
+                <li><a class="is-active" href="complex.html">Complex</a></li>
                 <li><a href="events.html">Custom events</a></li>
             </ul>
         </footer>

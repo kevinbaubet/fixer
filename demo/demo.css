@@ -163,6 +163,7 @@ footer a {
     padding: 10px;
     color: #303748;
 }
+footer a.is-active,
 footer a:hover {
     text-decoration: none;
 }
@@ -183,7 +184,7 @@ footer a:hover {
 .demo-complex.is-fixed .map {
     position: fixed;
     top: 0;
-    width: 748px;
+    width: 749px;
 }
 .demo-complex.is-bottom .map {
     position: absolute;

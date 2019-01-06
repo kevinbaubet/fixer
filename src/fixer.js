@@ -133,6 +133,8 @@
 
         /**
          * Set start position
+         *
+         * @param int pos
          */
         setStart: function (pos) {
             this.start = parseInt((pos !== undefined) ? this.elements.container.offset().top + pos : this.elements.fixer.offset().top);
@@ -159,6 +161,9 @@
 
         /**
          * Set end position
+         *
+         * @param int pos
+         * @param bool addStart
          */
         setEnd: function (pos, addStart) {
             addStart = addStart || true;
@@ -190,6 +195,8 @@
 
         /**
          * Set current state information
+         *
+         * @param string state default, fixed, bottom
          */
         setState: function (state) {
             this.state = state;

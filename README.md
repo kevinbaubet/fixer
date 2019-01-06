@@ -41,20 +41,20 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
 ## Méthodes
 
-| Méthode        | Arguments | Description                                                              |
-|----------------|-----------|--------------------------------------------------------------------------|
-| setStart       | -         | Définition de la position de départ                                      |
-| getStart       | -         | Récupération de la position de départ                                    |
-| setEnd         | -         | Définition de la position de fin                                         |
-| getEnd         | -         | Récupération de la position de fin                                       |
-| setState       | -         | Définition de l'état courant                                             |
-| getState       | -         | Récupération de l'état courant                                           |
-| getScrollTop   | -         | Récupération de la valeur courante du scroll                             |
-| update         | -         | Met à jour les positions de début/fin de scroll par rapport au conteneur |
-| fixed          | -         | Fixe l'élément                                                           |
-| bottom         | -         | Place l'élément au bas du conteneur                                      |
-| reset          | -         | Remet l'élément à la normale                                             |
-| destroy        | -         | Enlève fixer du DOM                                                      | 
+| Méthode        | Arguments                                                                 | Description                                                              |
+|----------------|---------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| setStart       | **pos** *int* Position                                                    | Définition de la position de départ                                      |
+| getStart       | -                                                                         | Récupération de la position de départ                                    |
+| setEnd         | **pos** *int* Position, **addStart** *bool* Ajouter la position de départ | Définition de la position de fin                                         |
+| getEnd         | -                                                                         | Récupération de la position de fin                                       |
+| setState       | **state** *string* default, fixed, bottom                                 | Définition de l'état courant                                             |
+| getState       | -                                                                         | Récupération de l'état courant                                           |
+| getScrollTop   | **prev** *bool* get the previous value of scroll top                      | Récupération de la valeur courante du scroll                             |
+| update         | -                                                                         | Met à jour les positions de début/fin de scroll par rapport au conteneur |
+| fixed          | -                                                                         | Fixe l'élément                                                           |
+| bottom         | -                                                                         | Place l'élément au bas du conteneur                                      |
+| reset          | -                                                                         | Remet l'élément à la normale                                             |
+| destroy        | -                                                                         | Enlève fixer du DOM                                                      | 
 
 
 ## Désactivation des événements

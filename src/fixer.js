@@ -15,8 +15,8 @@
         this.state = 'default';
         this.scrollTop = 0;
         this.previousScrollTop = 0;
-        this.fixerTop = 0;
-        this.fixerBottom = 0;
+        this.start = 0;
+        this.end = 0;
 
         // Init
         if (this.prepareOptions()) {
@@ -28,11 +28,15 @@
 
     $.Fixer.defaults = {
         container: undefined,
-        from: undefined,
-        to: undefined,
+        start: undefined,
+        end: undefined,
         offset: 0,
         reverse: false,
-        scrollerDependency: false,
+        scrollEvent: true,
+        resizeEvent: true,
+        resizeTimeout: 100,
+        autoLoad: true,
+        autoUpdate: true,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
@@ -44,9 +48,12 @@
         },
         afterEventsHandler: undefined,
         onScroll: undefined,
+        onResize: undefined,
         onFixed: undefined,
         onBottom: undefined,
-        onReset: undefined
+        onReset: undefined,
+        onChangeState: undefined,
+        debug: false
     };
 
     $.Fixer.prototype = {
@@ -56,7 +63,14 @@
          * @return bool
          */
         prepareOptions: function () {
-            var self = this;
+            let self = this;
+
+            // Container
+            self.elements.container = (self.settings.container !== undefined && self.settings.container.length) ? self.settings.container : $('body');
+
+            // Start/End
+            self.setStart(self.settings.start);
+            self.setEnd(self.settings.end);
 
             // Classes
             $.each(self.settings.classes, function (key, value) {
@@ -65,6 +79,20 @@
                 }
             });
 
+            // Debug
+            if (self.settings.debug) {
+                if (self.settings.onScroll === undefined) {
+                    self.settings.onScroll = function () {
+                        console.log('scrollTop: ' + this.fixer.scrollTop);
+                    }
+                }
+                if (self.settings.onChangeState === undefined) {
+                    self.settings.onChangeState = function () {
+                        console.log('state: ' + this.state);
+                    }
+                }
+            }
+
             return true;
         },
 
@@ -72,125 +100,152 @@
          * Initialisation
          */
         init: function () {
-            // Container
-            this.elements.container = (this.settings.container !== undefined && this.settings.container.length) ? this.settings.container : this.elements.fixer.parent();
-
-            // Add classes
             this.elements.container.addClass(this.settings.classes.container);
             this.elements.fixer.addClass(this.settings.classes.element);
 
-            // Fixer element
-            this.update();
-
-            // Event
-            this.requestAnimationFramePolyfill();
             this.eventsHandler();
 
             return this;
         },
 
         /**
-         * Polyfill requestAnimationFrame
+         * Destruction de Fixer
          */
-        requestAnimationFramePolyfill: function () {
-            var lastTime = 0;
-            var vendorIndex = 0;
-            var vendors = ['o', 'ms', 'moz', 'webkit'];
+        destroy: function () {
+            this.reset();
+            this.setState('default');
+            this.elements.container.removeClass(this.settings.classes.container);
+            this.elements.fixer.removeClass(this.settings.classes.element);
+            $(window).off('.' + this.settings.classes.prefix);
 
-            for (vendorIndex = 0; vendorIndex < vendors.length && !window.requestAnimationFrame; ++vendorIndex) {
-                window.requestAnimationFrame = window[vendors[vendorIndex] + 'RequestAnimationFrame'];
-                window.cancelAnimationFrame = window[vendors[vendorIndex] + 'CancelAnimationFrame'] || window[vendors[vendorIndex] + 'CancelRequestAnimationFrame'];
-            }
-
-            if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function (callback) {
-                    var currTime = new Date().getTime();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function () {
-                        callback(currTime + timeToCall);
-                    }, timeToCall);
-
-                    lastTime = currTime + timeToCall;
-
-                    return id;
-                };
-            }
-
-            if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function (id) {
-                    clearTimeout(id);
-                };
-            }
+            return this;
         },
 
         /**
-         * Update fixer position
+         * Update positions
          */
         update: function () {
-            this.setFixerTop();
-            this.setFixerBottom();
+            this.setStart();
+            this.setEnd();
 
             return this;
         },
 
         /**
-         * Détermine le départ du scroll pour fixer l'élement
+         * Set start position
          */
-        setFixerTop: function () {
-            if (this.settings.from === undefined) {
-                this.fixerTop = parseInt(this.elements.fixer.offset().top);
-            } else if (this.settings.from < 0) {
-                this.fixerTop = parseInt(this.elements.fixer.offset().top + this.settings.from);
-            } else {
-                this.fixerTop = parseInt(this.settings.from);
+        setStart: function (pos) {
+            this.start = parseInt((pos !== undefined) ? this.elements.container.offset().top + pos : this.elements.fixer.offset().top);
+
+            if (this.settings.offset) {
+                this.start -= parseInt(this.settings.offset);
             }
 
-            this.fixerTop -= parseInt(this.settings.offset);
+            if (this.settings.debug) {
+                console.log('start: ' + this.getStart());
+            }
 
             return this;
         },
 
         /**
-         * Détermine la fin du scroll pour arrêter de fixer l'élément
+         * Get start position
+         *
+         * @returns int
          */
-        setFixerBottom: function () {
-            if (this.settings.to === undefined) {
-                this.fixerBottom = parseInt(this.elements.container.outerHeight() - this.elements.fixer.outerHeight());
-            } else if (this.settings.to < 0) {
-                this.fixerBottom = parseInt((this.elements.container.outerHeight() - this.elements.fixer.outerHeight()) + this.settings.to);
-            } else {
-                this.fixerBottom = parseInt(this.settings.to);
+        getStart: function () {
+            return this.start;
+        },
+
+        /**
+         * Set end position
+         */
+        setEnd: function (pos, addStart) {
+            addStart = addStart || true;
+            this.end = parseInt((pos !== undefined) ? pos : this.elements.container.height() - this.elements.fixer.height());
+
+            if (addStart !== undefined && addStart === true) {
+                this.end += this.getStart();
             }
 
-            this.fixerBottom += this.fixerTop;
+            if (this.settings.offset) {
+                this.end -= parseInt(this.settings.offset);
+            }
+
+            if (this.settings.debug) {
+                console.log('end: ' + this.getEnd());
+            }
 
             return this;
+        },
+
+        /**
+         * Get end position
+         *
+         * @returns int
+         */
+        getEnd: function () {
+            return this.end;
+        },
+
+        /**
+         * Set current state information
+         */
+        setState: function (state) {
+            this.state = state;
+
+            return this;
+        },
+
+        /**
+         * Get current state
+         *
+         * @returns string (default, fixed, bottom)
+         */
+        getState: function () {
+            return this.state;
+        },
+
+        /**
+         * Get current scroll top position
+         *
+         * @param prev bool get the previous value of scroll top
+         * @return int
+         */
+        getScrollTop: function (prev) {
+            prev = prev || false;
+
+            return (prev) ? this.previousScrollTop : this.scrollTop;
         },
 
         /**
          * Gestionnaire d'événements
          */
         eventsHandler: function () {
-            var self = this;
-            var eventsReady = false;
+            let self = this;
+            let eventsReady = false;
 
-            if (!self.settings.scrollerDependency) {
-                $(window).on('scroll.fixer', {self: self}, self.scrollHandler);
+            if (self.settings.scrollEvent) {
+                $(window).on('scroll.' + self.settings.classes.prefix, {self: self}, self.scrollHandler);
             }
 
-            $(window).on('touchstart.fixer', function () {
-                if (eventsReady === false) {
+            $(window).on('touchstart.' + self.settings.classes.prefix, function () {
+                if (!eventsReady) {
                     eventsReady = true;
 
-                    self.elements.container.find(':input').on('focus blur', function () {
+                    self.elements.container.find(':input').on('focus.' + self.settings.classes.prefix + ' blur.' + self.settings.classes.prefix, function () {
                         self.elements.container.toggleClass(self.settings.classes.input);
                     });
                 }
             });
 
-            $(window).on('load', function () {
-                self.update();
-            });
+            if (self.settings.autoLoad) {
+                $(window).on('load.' + self.settings.classes.prefix, {self: self}, self.scrollHandler);
+            }
+
+            if (self.settings.resizeEvent) {
+                $(window).on('resize.' + self.settings.classes.prefix + ' orientationchange.' + self.settings.classes.prefix, {self: self}, self.resizeHandler);
+            }
 
             // User callback
             if (self.settings.afterEventsHandler !== undefined) {
@@ -204,40 +259,41 @@
         },
 
         /**
-         * Gestionnaire de scroll
+         * Event scroll
+         *
+         * @param event
          */
         scrollHandler: function (event) {
-            var self = (event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
+            let self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
 
             window.requestAnimationFrame(function () {
                 self.scrollTop = window.pageYOffset;
 
-                // En mode inverse
+                // Reverse mode
                 if (self.settings.reverse) {
-
                     // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
-                    if (self.previousScrollTop > self.scrollTop && self.scrollTop >= self.fixerTop) {
-                        self.toFixed();
+                    if (self.getScrollTop('previous') > self.getScrollTop() && self.getScrollTop() >= self.getStart()) {
+                        self.fixed();
 
                     // Si le scroll défile normalement, on remet à l'état par défaut
-                    } else if (self.previousScrollTop < self.scrollTop || self.scrollTop < self.fixerTop) {
-                        self.toReset();
+                    } else if (self.getScrollTop('previous') < self.getScrollTop() || self.getScrollTop() < self.getStart()) {
+                        self.reset();
                     }
 
-                    self.previousScrollTop = self.scrollTop;
+                    self.previousScrollTop = self.getScrollTop();
 
                 } else {
-                    // Si le scroll est entre le from/to défini, on fixe
-                    if (self.scrollTop >= self.fixerTop && self.scrollTop < self.fixerBottom) {
-                        self.toFixed();
+                    // Si le scroll est entre le start/end défini, on fixe
+                    if (self.getScrollTop() > self.getStart() && self.getScrollTop() <= self.getEnd()) {
+                        self.fixed();
 
                     // Si le scroll est supérieur à to, on arrête de fixer
-                    } else if (self.scrollTop >= self.fixerBottom) {
-                        self.toBottom();
+                    } else if (self.scrollTop >= self.getEnd()) {
+                        self.bottom();
 
                     // Sinon, on remet à l'état par défaut
                     } else {
-                        self.toReset();
+                        self.reset();
                     }
                 }
 
@@ -246,7 +302,7 @@
                     self.settings.onScroll.call({
                         fixer: self,
                         event: (event.data === undefined) ? event.event : event,
-                        state: self.state
+                        state: self.getState()
                     });
                 }
             });
@@ -255,62 +311,123 @@
         },
 
         /**
-         * Fixe l'élément
+         * Event resize
+         *
+         * @param event
          */
-        toFixed: function () {
-            // User callback
-            if (this.settings.onFixed !== undefined && this.state !== 'fixed') {
-                this.settings.onFixed.call(this);
+        resizeHandler: function (event) {
+            let self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
+            let timeout = undefined;
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(function () {
+                // Update positions
+                if (self.settings.autoUpdate) {
+                    self.update();
+                }
+
+                // User callback
+                if (self.settings.onResize !== undefined) {
+                    self.settings.onResize.call({
+                        fixer: self,
+                        event: (event.data === undefined) ? event.event : event,
+                        start: self.getStart(),
+                        end: self.getEnd()
+                    });
+                }
+            }, self.settings.resizeTimeout);
+
+            return self;
+        },
+
+        /**
+         * Stick element
+         */
+        fixed: function () {
+            if (this.getState() !== 'fixed') {
+                // User callback
+                if (this.settings.onFixed !== undefined) {
+                    this.settings.onFixed.call(this);
+                }
+
+                // States
+                this.elements.container
+                    .removeClass(this.settings.classes.reset)
+                    .removeClass(this.settings.classes.bottom)
+                    .addClass(this.settings.classes.fixed);
+
+                this.setState('fixed');
+
+                // User callback
+                if (this.settings.onChangeState !== undefined) {
+                    this.settings.onChangeState.call({
+                        fixer: this,
+                        state: this.getState()
+                    });
+                }
             }
-
-            // État
-            this.elements.container
-                .removeClass(this.settings.classes.reset)
-                .removeClass(this.settings.classes.bottom)
-                .addClass(this.settings.classes.fixed);
-
-            this.state = 'fixed';
 
             return this;
         },
 
         /**
-         * Place l'élément au bas du conteneur
+         * Set element to bottom of the container
          */
-        toBottom: function () {
-            // User callback
-            if (this.settings.onBottom !== undefined && this.state !== 'bottom') {
-                this.settings.onBottom.call(this);
+        bottom: function () {
+            if (this.getState() !== 'bottom') {
+                // User callback
+                if (this.settings.onBottom !== undefined) {
+                    this.settings.onBottom.call(this);
+                }
+
+                // States
+                this.elements.container
+                    .removeClass(this.settings.classes.reset)
+                    .removeClass(this.settings.classes.fixed)
+                    .addClass(this.settings.classes.bottom);
+
+                this.setState('bottom');
+
+                // User callback
+                if (this.settings.onChangeState !== undefined) {
+                    this.settings.onChangeState.call({
+                        fixer: this,
+                        state: this.getState()
+                    });
+                }
             }
-
-            // État
-            this.elements.container
-                .removeClass(this.settings.classes.reset)
-                .removeClass(this.settings.classes.fixed)
-                .addClass(this.settings.classes.bottom);
-
-            this.state = 'bottom';
 
             return this;
         },
 
         /**
-         * Remet l'élément à la normale
+         * Reset element
          */
-        toReset: function () {
-            // User callback
-            if (this.settings.onReset !== undefined && this.state !== 'default') {
-                this.settings.onReset.call(this);
-            }
+        reset: function () {
+            if (this.getState() !== 'default') {
+                // User callback
+                if (this.settings.onReset !== undefined) {
+                    this.settings.onReset.call(this);
+                }
 
-            // État
-            this.elements.container.removeClass(this.settings.classes.fixed);
+                // States
+                this.elements.container.removeClass(this.settings.classes.fixed);
 
-            if (this.state === 'fixed') {
-                this.elements.container.addClass(this.settings.classes.reset);
+                if (this.getState() === 'fixed') {
+                    this.elements.container.addClass(this.settings.classes.reset);
+                }
+
+                this.setState('default');
+
+                // User callback
+                if (this.settings.onChangeState !== undefined) {
+                    this.settings.onChangeState.call({
+                        fixer: this,
+                        state: this.getState()
+                    });
+                }
             }
-            
-            this.state = 'default';
 
             return this;
         }

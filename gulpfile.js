@@ -3,16 +3,19 @@ const plugins = require('gulp-load-plugins')({
     pattern: ['*'],
     scope: ['devDependencies']
 });
+const uglify = require('gulp-uglify-es').default;
 
 // Compilation SASS
-plugins.gulp.task('sass', function () {
-    return plugins.gulp.src('./src/**/*.scss')
-        .pipe(plugins.sass(package.sass).on('error', plugins.sass.logError))
-        .pipe(plugins.postcss([
+plugins.gulp.task('sass', function (event) {
+    plugins.pump([
+        plugins.gulp.src('./src/**/*.scss'),
+        plugins.sass(package.sass),
+        plugins.postcss([
             plugins.autoprefixer(package.autoprefixer),
             plugins.postcssPxtorem(package.pxtorem)
-        ]))
-        .pipe(plugins.gulp.dest('./dist/'));
+        ]),
+        plugins.gulp.dest('./dist/')
+    ], event);
 });
 
 // Watch SASS
@@ -21,15 +24,15 @@ plugins.gulp.task('watchsass', function () {
 });
 
 // Minify
-plugins.gulp.task('minify', function() {
-    return plugins.gulp.src('./src/**/*.js')
-        .pipe(plugins.uglify()).on('error', function (error) {
-            console.error(error);
-        })
-        .pipe(plugins.rename(function (path) {
+plugins.gulp.task('minify', function (event) {
+    plugins.pump([
+        plugins.gulp.src('./src/**/*.js'),
+        uglify(),
+        plugins.rename(function (path) {
             path.extname = '.min.js'
-        }))
-        .pipe(plugins.gulp.dest('./dist/'));
+        }),
+        plugins.gulp.dest('./dist/')
+    ], event);
 });
 
 // Alias

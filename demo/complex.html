@@ -7,7 +7,7 @@
 
         <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 
-        <script src="../src/fixer3.js"></script>
+        <script src="../src/fixer.js"></script>
         <script>
             jQuery(function ($) {
                 $.FixerComplexExample = function () {
@@ -89,6 +89,7 @@
                             },
                             onChangeState: function () {
                                 self.elements.map.html('Fixed element: ' + this.state);
+                                self.updateFixer();
                             },
                             debug: false
                         });
@@ -98,8 +99,8 @@
                         return self;
                     },
                     updateFixer: function () {
-                        if (this.sizes.bottom.height !== undefined) {
-                            this.fixer.elements.fixer.css('margin-bottom', this.sizes.bottom.height);
+                        if (this.fixer.getState() === 'bottom' && this.sizes.bottom.height !== undefined) {
+                            this.elements.mapContainer.css('margin-bottom', this.sizes.bottom.height);
                         }
 
                         return this;
@@ -146,6 +147,7 @@
                             self.elements.searchResultList.empty();
                             self.elements.searchSubmit.html('Search');
                             self.elements.searchResult.removeClass('is-showed');
+                            self.elements.mapContainer.css('margin-bottom', 0);
                             self.update();
 
                         } else {

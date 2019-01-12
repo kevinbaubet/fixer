@@ -63,7 +63,7 @@
          * @return bool
          */
         prepareOptions: function () {
-            let self = this;
+            var self = this;
 
             // Container
             self.elements.container = (self.settings.container !== undefined && self.settings.container.length) ? self.settings.container : $('body');
@@ -229,8 +229,8 @@
          * Gestionnaire d'événements
          */
         eventsHandler: function () {
-            let self = this;
-            let eventsReady = false;
+            var self = this;
+            var eventsReady = false;
 
             if (self.settings.scrollEvent) {
                 $(window).on('scroll.' + self.settings.classes.prefix, {self: self}, self.scrollHandler);
@@ -271,7 +271,7 @@
          * @param event
          */
         scrollHandler: function (event) {
-            let self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
+            var self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
 
             window.requestAnimationFrame(function () {
                 self.scrollTop = window.pageYOffset;
@@ -323,8 +323,8 @@
          * @param event
          */
         resizeHandler: function (event) {
-            let self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
-            let timeout = undefined;
+            var self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
+            var timeout = undefined;
 
             clearTimeout(timeout);
 

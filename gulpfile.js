@@ -3,7 +3,6 @@ const plugins = require('gulp-load-plugins')({
     pattern: ['*'],
     scope: ['devDependencies']
 });
-const uglify = require('gulp-uglify-es').default;
 
 // Compilation SASS
 plugins.gulp.task('sass', function (event) {
@@ -27,7 +26,7 @@ plugins.gulp.task('watchsass', function () {
 plugins.gulp.task('minify', function (event) {
     plugins.pump([
         plugins.gulp.src('./src/**/*.js'),
-        uglify(),
+        plugins.uglify(),
         plugins.rename(function (path) {
             path.extname = '.min.js'
         }),

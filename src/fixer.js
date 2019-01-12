@@ -33,10 +33,10 @@
         offset: 0,
         reverse: false,
         scrollEvent: true,
-        resizeEvent: true,
+        resizeEvent: false,
         resizeTimeout: 100,
         autoLoad: true,
-        autoUpdate: true,
+        autoUpdate: false,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',

@@ -50,6 +50,10 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | setState       | **state** *string* default, fixed, bottom                                 | Définition de l'état courant                                             |
 | getState       | -                                                                         | Récupération de l'état courant                                           |
 | getScrollTop   | **prev** *bool* get the previous value of scroll top                      | Récupération de la valeur courante du scroll                             |
+| getContainer   | **container** *jQuery object*                                             |                             |
+| setContainer   | -                                                                         |                             |
+| getFixer       | **element** *jQuery object*                                               |                             |
+| setFixer       | -                                                                         |                             |
 | update         | -                                                                         | Met à jour les positions de début/fin de scroll par rapport au conteneur |
 | fixed          | -                                                                         | Fixe l'élément                                                           |
 | bottom         | -                                                                         | Place l'élément au bas du conteneur                                      |

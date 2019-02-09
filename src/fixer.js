@@ -9,7 +9,7 @@
         };
 
         // Config
-        $.extend(true, (this.settings = {}), $.Fixer.defaults, options);
+        $.extend(true, this.settings = {}, $.Fixer.defaults, options);
 
         // Variables
         this.state = 'default';
@@ -17,13 +17,14 @@
         this.previousScrollTop = 0;
         this.start = 0;
         this.end = 0;
+        this.resizeTimeout = undefined;
 
         // Init
         if (this.prepareOptions()) {
             return this.init();
         }
 
-        return false;
+        return this;
     };
 
     $.Fixer.defaults = {
@@ -60,13 +61,13 @@
         /**
          * Préparation des options utilisateur
          *
-         * @return bool
+         * @return boolean
          */
         prepareOptions: function () {
             var self = this;
 
             // Container
-            self.elements.container = (self.settings.container !== undefined && self.settings.container.length) ? self.settings.container : $('body');
+            self.setContainer(self.settings.container !== undefined && self.settings.container.length ? self.settings.container : $('body'));
 
             // Start/End
             self.setStart(self.settings.start);
@@ -100,8 +101,8 @@
          * Initialisation
          */
         init: function () {
-            this.elements.container.addClass(this.settings.classes.container);
-            this.elements.fixer.addClass(this.settings.classes.element);
+            this.getContainer().addClass(this.settings.classes.container);
+            this.getFixer().addClass(this.settings.classes.element);
 
             this.eventsHandler();
 
@@ -114,8 +115,8 @@
         destroy: function () {
             this.reset();
             this.setState('default');
-            this.elements.container.removeClass(this.settings.classes.container);
-            this.elements.fixer.removeClass(this.settings.classes.element);
+            this.getContainer().removeClass(this.settings.classes.container);
+            this.getFixer().removeClass(this.settings.classes.element);
             $(window).off('.' + this.settings.classes.prefix);
 
             return this;
@@ -134,10 +135,10 @@
         /**
          * Set start position
          *
-         * @param int pos
+         * @param pos (int)
          */
         setStart: function (pos) {
-            this.start = parseInt((pos !== undefined) ? this.elements.container.offset().top + pos : this.elements.fixer.offset().top);
+            this.start = parseInt(pos === undefined ? this.getFixer().offset().top : this.getContainer().offset().top + pos);
 
             if (this.settings.offset) {
                 this.start -= parseInt(this.settings.offset);
@@ -162,12 +163,12 @@
         /**
          * Set end position
          *
-         * @param int pos
-         * @param bool addStart
+         * @param pos (int)
+         * @param addStart (boolean)
          */
         setEnd: function (pos, addStart) {
             addStart = addStart || true;
-            this.end = parseInt((pos !== undefined) ? pos : this.elements.container.height() - this.elements.fixer.height());
+            this.end = parseInt(pos === undefined ? this.getContainer().height() - this.getFixer().height() : pos);
 
             if (addStart !== undefined && addStart === true) {
                 this.end += this.getStart();
@@ -196,7 +197,7 @@
         /**
          * Set current state information
          *
-         * @param string state default, fixed, bottom
+         * @param state (string) default, fixed, bottom
          */
         setState: function (state) {
             this.state = state;
@@ -207,7 +208,7 @@
         /**
          * Get current state
          *
-         * @returns string (default, fixed, bottom)
+         * @return string (default, fixed, bottom)
          */
         getState: function () {
             return this.state;
@@ -216,7 +217,7 @@
         /**
          * Get current scroll top position
          *
-         * @param prev bool get the previous value of scroll top
+         * @param prev (boolean) get the previous value of scroll top
          * @return int
          */
         getScrollTop: function (prev) {
@@ -240,8 +241,8 @@
                 if (!eventsReady) {
                     eventsReady = true;
 
-                    self.elements.container.find(':input').on('focus.' + self.settings.classes.prefix + ' blur.' + self.settings.classes.prefix, function () {
-                        self.elements.container.toggleClass(self.settings.classes.input);
+                    self.getContainer().find(':input').on('focus.' + self.settings.classes.prefix + ' blur.' + self.settings.classes.prefix, function () {
+                        self.getContainer().toggleClass(self.settings.classes.input);
                     });
                 }
             });
@@ -324,11 +325,10 @@
          */
         resizeHandler: function (event) {
             var self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
-            var timeout = undefined;
 
-            clearTimeout(timeout);
+            clearTimeout(self.resizeTimeout);
 
-            timeout = setTimeout(function () {
+            self.resizeTimeout = setTimeout(function () {
                 // Update positions
                 if (self.settings.autoUpdate) {
                     self.update();
@@ -338,7 +338,7 @@
                 if (self.settings.onResize !== undefined) {
                     self.settings.onResize.call({
                         fixer: self,
-                        event: (event.data === undefined) ? event.event : event,
+                        event: event.data === undefined ? event.event : event,
                         start: self.getStart(),
                         end: self.getEnd()
                     });
@@ -359,7 +359,7 @@
                 }
 
                 // States
-                this.elements.container
+                this.getContainer()
                     .removeClass(this.settings.classes.reset)
                     .removeClass(this.settings.classes.bottom)
                     .addClass(this.settings.classes.fixed);
@@ -389,7 +389,7 @@
                 }
 
                 // States
-                this.elements.container
+                this.getContainer()
                     .removeClass(this.settings.classes.reset)
                     .removeClass(this.settings.classes.fixed)
                     .addClass(this.settings.classes.bottom);
@@ -419,10 +419,10 @@
                 }
 
                 // States
-                this.elements.container.removeClass(this.settings.classes.fixed);
+                this.getContainer().removeClass(this.settings.classes.fixed);
 
                 if (this.getState() === 'fixed') {
-                    this.elements.container.addClass(this.settings.classes.reset);
+                    this.getContainer().addClass(this.settings.classes.reset);
                 }
 
                 this.setState('default');
@@ -435,6 +435,41 @@
                     });
                 }
             }
+
+            return this;
+        },
+
+        /**
+         * Récupère le conteneur courant
+         */
+        getContainer: function () {
+            return this.elements.container;
+        },
+
+        /**
+         * Défini le conteneur dans lequel l'élément à fixer sera les limites
+         *
+         * @param container
+         */
+        setContainer: function (container) {
+            this.elements.container = container;
+
+            return this;
+        },
+
+        /**
+         * Récupère l'élément à fixer
+         */
+        getFixer: function () {
+            return this.elements.fixer;
+        },
+
+        /**
+         *
+         * @param element
+         */
+        setFixer: function (element) {
+            this.elements.fixer = element;
 
             return this;
         }

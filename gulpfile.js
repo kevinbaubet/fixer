@@ -1,39 +1,39 @@
-const package = require('./package.json');
+const packagejson = require('./package.json');
 const plugins = require('gulp-load-plugins')({
     pattern: ['*'],
     scope: ['devDependencies']
 });
 
 // Compilation SASS
-plugins.gulp.task('sass', function (event) {
-    plugins.pump([
+function sass(pumpCallback) {
+    return plugins.pump([
         plugins.gulp.src('./src/**/*.scss'),
-        plugins.sass(package.sass),
+        plugins.sass(packagejson.sass),
         plugins.postcss([
-            plugins.autoprefixer(package.autoprefixer),
-            plugins.postcssPxtorem(package.pxtorem)
+            plugins.autoprefixer(packagejson.autoprefixer),
+            plugins.postcssPxtorem(packagejson.pxtorem)
         ]),
         plugins.gulp.dest('./dist/')
-    ], event);
-});
+    ], pumpCallback);
+}
 
 // Watch SASS
-plugins.gulp.task('watchsass', function () {
-    plugins.gulp.watch('./src/**/*.scss', ['sass']);
-});
+function watchsass() {
+    plugins.gulp.watch('./src/**/*.scss', plugins.gulp.parallel(sass))
+}
 
 // Minify
-plugins.gulp.task('minify', function (event) {
-    plugins.pump([
+function minify(pumpCallback) {
+    return plugins.pump([
         plugins.gulp.src('./src/**/*.js'),
         plugins.uglify(),
         plugins.rename(function (path) {
             path.extname = '.min.js'
         }),
         plugins.gulp.dest('./dist/')
-    ], event);
-});
+    ], pumpCallback);
+}
 
 // Alias
-plugins.gulp.task('default', ['sass', 'watchsass']);
-plugins.gulp.task('prod', ['sass', 'minify']);
+exports.default = plugins.gulp.series(sass, watchsass);
+exports.prod = plugins.gulp.parallel(sass, minify);

@@ -18,6 +18,7 @@
         this.start = 0;
         this.end = 0;
         this.resizeTimeout = undefined;
+        this.fixerHeight = 0;
 
         // Init
         if (this.prepareOptions()) {
@@ -38,6 +39,7 @@
         resizeTimeout: 100,
         autoLoad: true,
         autoUpdate: false,
+        autoPadding: false,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
@@ -72,6 +74,11 @@
             // Start/End
             self.setStart(self.settings.start);
             self.setEnd(self.settings.end);
+
+            // Auto-padding seulement sur <body>
+            if (self.settings.autoPadding && self.getContainer().is('body')) {
+                self.fixerHeight = Math.round(self.getFixer().height());
+            }
 
             // Classes
             $.each(self.settings.classes, function (key, value) {
@@ -358,6 +365,11 @@
                     this.settings.onFixed.call(this);
                 }
 
+                // Auto-padding
+                if (this.settings.autoPadding && this.fixerHeight !== 0) {
+                    this.getContainer().css('padding-top', this.fixerHeight);
+                }
+
                 // States
                 this.getContainer()
                     .removeClass(this.settings.classes.reset)
@@ -416,6 +428,11 @@
                 // User callback
                 if (this.settings.onReset !== undefined) {
                     this.settings.onReset.call(this);
+                }
+
+                // Auto-padding
+                if (this.settings.autoPadding && this.fixerHeight !== 0) {
+                    this.getContainer().css('padding-top', 0);
                 }
 
                 // States

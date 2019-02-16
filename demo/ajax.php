@@ -1,6 +1,6 @@
 <?php
-    $itemPerPage = (isset($_GET['rows'])) ? $_GET['rows'] : 0;
-    $start = (isset($_GET['offset'])) ? $_GET['offset'] : -1;
+    $itemPerPage = isset($_GET['rows']) ? $_GET['rows'] : 0;
+    $start = isset($_GET['offset']) ? $_GET['offset'] : -1;
     $out = [];
 
     if ($itemPerPage > 0 && $start >= 0) {

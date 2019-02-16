@@ -139,7 +139,7 @@
                         return this;
                     },
                     searchSubmitHandler: function (event) {
-                        let self = (event !== undefined) ? event.data.self : this;
+                        let self = event === undefined ? this : event.data.self;
 
                         if (self.states.result) {
                             self.states.result = false;
@@ -163,7 +163,7 @@
                         return self;
                     },
                     searchMoreHandler: function (event) {
-                        let self = (event !== undefined) ? event.data.self : this;
+                        let self = event === undefined ? this : event.data.self;
 
                         self.getResults(function () {
                             self.update();

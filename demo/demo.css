@@ -56,15 +56,6 @@ ul {
     margin: 0;
     padding: 0;
 }
-header {
-    position: absolute;
-    z-index: 5;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 60px;
-    transition: background-color .4s;
-}
 header p {
     float: left;
     color: #fff;
@@ -119,7 +110,7 @@ aside {
 #aside-block-1-wrapper,
 #aside-block-2-wrapper {
     position: relative;
-    height: 1200px;
+    height: 120vh;
 }
 .aside-block {
     padding: 20px 10%;

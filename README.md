@@ -16,11 +16,12 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | end                               | integer  | undefined            | Hauteur du scroll à partir duquel l'élément ne sera plus fixé. Si la valeur n'est pas définie, c'est la hauteur du conteneur - la position haute de l'élément |
 | offset                            | integer  | 0                    | Décalage des limites pour fixer                                                                                                                               |
 | reverse                           | boolean  | false                | Inverser le fonctionnenemnt pour fixer l'élément. Si true, il faudra remonter la page pour fixer l'élément                                                    |
-| scrollEvent                       | boolean  | true                 | Activer/Désactiver l'événenement de scroll. Voir section "Désactivation des événements"                                                                       |
-| resizeEvent                       | boolean  | false                | Activer/Désactiver l'événenement de resize. Voir section "Désactivation des événements"                                                                       |
+| scrollEvent                       | boolean  | true                 | Activer/Désactiver l'événenement de scroll. Voir section *Événements personnalisés*                                                                           |
+| resizeEvent                       | boolean  | false                | Activer/Désactiver l'événenement de resize. Voir section *Événements personnalisés*                                                                           |
 | resizeTimeout                     | integer  | 100                  | Delai avant l'execution de l'événement resize, en ms                                                                                                          |
-| autoLoad                          | boolean  | true                 | Éxecuter Fixer à l'événement "load"                                                                                                                           |
-| autoUpdate                        | boolean  | false                | Met à jour les positions de départ/fin de Fixer lors de l'événement "resize"                                                                                  |
+| autoLoad                          | boolean  | true                 | Éxecuter Fixer à l'événement *load*                                                                                                                           |
+| autoUpdate                        | boolean  | false                | Requis l'option *resizeEvent* à *true*. Met à jour les positions de départ/fin de Fixer lors de l'événement *resize*                                          |
+| autoPadding                       | boolean  | true                 | Fonctionne seulement si le conteneur est *body*. Cela permet de compenser le décalage du scroll dans la page lorsque l'élément est fixé                       |
 | classes                           | object   | Voir ci-dessous      | Liste les options ci-dessous                                                                                                                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;prefix    | string   | 'fixer'              | Préfix de classe                                                                                                                                              |
 | &nbsp;&nbsp;&nbsp;&nbsp;container | string   | '{prefix}-container' | Classe pour le conteneur de l'élement à fixer                                                                                                                 |
@@ -41,27 +42,28 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
 ## Méthodes
 
-| Méthode        | Arguments                                                                 | Description                                                              |
-|----------------|---------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| setStart       | **pos** *int* Position                                                    | Définition de la position de départ                                      |
-| getStart       | -                                                                         | Récupération de la position de départ                                    |
-| setEnd         | **pos** *int* Position, **addStart** *bool* Ajouter la position de départ | Définition de la position de fin                                         |
-| getEnd         | -                                                                         | Récupération de la position de fin                                       |
-| setState       | **state** *string* default, fixed, bottom                                 | Définition de l'état courant                                             |
-| getState       | -                                                                         | Récupération de l'état courant                                           |
-| getScrollTop   | **prev** *bool* get the previous value of scroll top                      | Récupération de la valeur courante du scroll                             |
-| getContainer   | **container** *jQuery object*                                             |                             |
-| setContainer   | -                                                                         |                             |
-| getFixer       | **element** *jQuery object*                                               |                             |
-| setFixer       | -                                                                         |                             |
-| update         | -                                                                         | Met à jour les positions de début/fin de scroll par rapport au conteneur |
-| fixed          | -                                                                         | Fixe l'élément                                                           |
-| bottom         | -                                                                         | Place l'élément au bas du conteneur                                      |
-| reset          | -                                                                         | Remet l'élément à la normale                                             |
-| destroy        | -                                                                         | Enlève fixer du DOM                                                      | 
+| Méthode        | Arguments                                                                      | Description                                                              |
+|----------------|--------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| setStart       | **position** *int* Position                                                    | Définition de la position de départ                                      |
+| getStart       | -                                                                              | Récupération de la position de départ                                    |
+| setEnd         | **position** *int* Position, **addStart** *bool* Ajouter la position de départ | Définition de la position de fin                                         |
+| getEnd         | -                                                                              | Récupération de la position de fin                                       |
+| setState       | **state** *string* default, fixed, bottom                                      | Définition de l'état courant                                             |
+| getState       | -                                                                              | Récupération de l'état courant                                           |
+| setScrollTop   | **type** *string* current, previous, **position** *int* Valeur du scroll       | Définition de la valeur courante ou précédente du scroll                 |
+| getScrollTop   | **type** *string* current, previous                                            | Récupération de la valeur courante ou précédente du scroll               |
+| setContainer   | -                                                                              | Définition du conteneur courant                                          |
+| getContainer   | **container** *jQuery object*                                                  | Récupération le conteneur courant                                        |
+| setFixer       | -                                                                              | Définition de l'élement à fixer                                          |
+| getFixer       | **element** *jQuery object*                                                    | Récupération l'élément à fixer courant                                   |
+| update         | -                                                                              | Met à jour les positions de début/fin de scroll par rapport au conteneur |
+| fixed          | -                                                                              | Fixe l'élément                                                           |
+| bottom         | -                                                                              | Place l'élément au bas du conteneur                                      |
+| reset          | -                                                                              | Remet l'élément à la normale                                             |
+| destroy        | -                                                                              | Enlève Fixer du DOM                                                      | 
 
 
-## Désactivation des événements
+## Événements personnalisés
 
 Il est possible de désactiver les événements de *scroll* et de *resize* pour les gérer d'une autre façon.
 

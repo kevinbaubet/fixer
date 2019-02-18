@@ -114,7 +114,7 @@ aside {
 }
 .aside-block {
     padding: 20px 10%;
-    height: 400px;
+    height: 50vh;
     background: #fff;
     overflow: hidden;
 }

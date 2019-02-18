@@ -41,7 +41,7 @@
         resizeTimeout: 100,
         autoLoad: true,
         autoUpdate: false,
-        autoPadding: true,
+        autoPadding: false,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
@@ -77,8 +77,8 @@
             self.setStart(self.settings.start);
             self.setEnd(self.settings.end);
 
-            // Auto-padding seulement sur <body>
-            if (self.settings.autoPadding && self.getContainer().is('body')) {
+            // Auto-padding
+            if (self.settings.autoPadding) {
                 self.fixerHeight = Math.round(self.getFixer().height());
             }
 

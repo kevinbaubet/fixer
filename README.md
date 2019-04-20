@@ -2,6 +2,10 @@
 
 Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 
+* Compatibilité : IE11+
+* Dépendance : jQuery
+
+
 ## Initialisation
 
     var fixer = $('#element').fixer([options]);
@@ -22,6 +26,8 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | autoLoad                          | boolean  | true                 | Éxecuter Fixer à l'événement *load*                                                                                                                           |
 | autoUpdate                        | boolean  | false                | Requis l'option *resizeEvent* à *true*. Met à jour les positions de départ/fin de Fixer lors de l'événement *resize*                                          |
 | autoPadding                       | boolean  | false                | Permet de compenser le décalage du scroll dans le conteneur lorsque l'élément est fixé                                                                        |
+| autoWidth                         | boolean  | false                | Permet de définir automatiquement la largeur de l'élément à fixer                                                                                             |
+| autoPosition                      | mixed    | false                | Permet de définir automatiquement la position de l'élément à fixer. Valeur possibles : 'left' ou 'right'                                                      |
 | classes                           | object   | Voir ci-dessous      | Liste les options ci-dessous                                                                                                                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;prefix    | string   | 'fixer'              | Préfix de classe                                                                                                                                              |
 | &nbsp;&nbsp;&nbsp;&nbsp;container | string   | '{prefix}-container' | Classe pour le conteneur de l'élement à fixer                                                                                                                 |
@@ -48,6 +54,12 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | getStart       | -                                                                              | Récupération de la position de départ                                    |
 | setEnd         | **position** *int* Position, **addStart** *bool* Ajouter la position de départ | Définition de la position de fin                                         |
 | getEnd         | -                                                                              | Récupération de la position de fin                                       |
+| setHeight      | -                                                                              | Définition de la hauteur de l'élément fixé                               |
+| getHeight      | -                                                                              | Récupération de la hauteur de l'élément fixé                             |
+| setWidth       | -                                                                              | Définition de la largeur de l'élément fixé                               |
+| getWidth       | -                                                                              | Récupération de la largeur de l'élément fixé                             |
+| setPosition    | -                                                                              | Définition de la position de l'élément fixé                              |
+| getPosition    | -                                                                              | Récupération de la position de l'élément fixé                            |
 | setState       | **state** *string* default, fixed, bottom                                      | Définition de l'état courant                                             |
 | getState       | -                                                                              | Récupération de l'état courant                                           |
 | setScrollTop   | **type** *string* current, previous, **position** *int* Valeur du scroll       | Définition de la valeur courante ou précédente du scroll                 |

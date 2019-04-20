@@ -83,6 +83,9 @@
 
                         self.fixer = self.elements.mapContainer.fixer({
                             autoUpdate: false,
+                            autoPosition: 'left',
+                            autoWidth: true,
+                            resizeEvent: true,
                             onResize: function () {
                                 this.fixer.setState('default');
                                 self.update();
@@ -204,12 +207,6 @@
                      *
                      * @returns {width: *, height: *}
                      */
-                    getMapSize: function () {
-                        return {
-                            width: parseInt(this.elements.mapContainer.width()),
-                            height: parseInt(this.elements.mapContainer.height())
-                        };
-                    },
                     getWindowSize: function () {
                         return {
                             width: parseInt(window.innerWidth),
@@ -228,7 +225,6 @@
                         };
                     },
                     updateSizes: function () {
-                        this.sizes.map = this.getMapSize();
                         this.sizes.sidebar = this.getSidebarSize();
                         this.sizes.window = this.getWindowSize();
                         this.sizes.bottom = this.getBottomSize();

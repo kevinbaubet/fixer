@@ -21,6 +21,8 @@
         this.end = 0;
         this.resizeTimeout = undefined;
         this.fixerHeight = 0;
+        this.fixerWidth = 0;
+        this.fixerPosition = 0;
 
         // Init
         if (this.prepareOptions()) {
@@ -42,6 +44,8 @@
         autoLoad: true,
         autoUpdate: false,
         autoPadding: false,
+        autoWidth: false,
+        autoPosition: false,
         classes: {
             prefix: 'fixer',
             container: '{prefix}-container',
@@ -77,9 +81,15 @@
             self.setStart(self.settings.start);
             self.setEnd(self.settings.end);
 
-            // Auto-padding
+            // Auto
             if (self.settings.autoPadding) {
-                self.fixerHeight = Math.round(self.getFixer().height());
+                self.setHeight();
+            }
+            if (self.settings.autoWidth || self.settings.autoPosition === 'right') {
+                self.setWidth();
+            }
+            if (self.settings.autoPosition) {
+                self.setPosition();
             }
 
             // Classes
@@ -227,6 +237,58 @@
          */
         getEnd: function () {
             return this.end;
+        },
+
+        /**
+         * Set current height
+         */
+        setHeight: function () {
+            this.fixerHeight = Math.round(this.getFixer().height());
+        },
+
+        /**
+         * Get current height
+         *
+         * @return {number}
+         */
+        getHeight: function () {
+            return this.fixerHeight;
+        },
+
+        /**
+         * Set current width
+         */
+        setWidth: function () {
+            this.fixerWidth = Math.round(this.getFixer().width());
+        },
+
+        /**
+         * Get current width
+         *
+         * @return {number}
+         */
+        getWidth: function () {
+            return this.fixerWidth;
+        },
+
+        /**
+         * Set current position from left or right
+         */
+        setPosition: function () {
+            this.fixerPosition = parseInt(this.getFixer().offset().left);
+
+            if (this.settings.autoPosition === 'right') {
+                this.fixerPosition += this.getWidth();
+            }
+        },
+
+        /**
+         * Get current position
+         *
+         * @return {number}
+         */
+        getPosition: function () {
+            return this.fixerPosition;
         },
 
         /**
@@ -404,6 +466,17 @@
             this.setStart(0);
             this.setEnd();
 
+            // Auto
+            if (this.settings.autoPadding) {
+                this.setHeight();
+            }
+            if (this.settings.autoWidth || this.settings.autoPosition === 'right') {
+                this.setWidth();
+            }
+            if (this.settings.autoPosition) {
+                this.setPosition();
+            }
+
             return this;
         },
 
@@ -417,9 +490,15 @@
                     this.settings.onFixed.call(this);
                 }
 
-                // Auto-padding
-                if (this.settings.autoPadding && this.fixerHeight !== 0) {
-                    this.getContainer().css('padding-top', this.fixerHeight);
+                // Auto
+                if (this.settings.autoPadding && this.getHeight() !== 0) {
+                    this.getContainer().css('padding-top', this.getHeight());
+                }
+                if (this.settings.autoWidth && this.getWidth() !== 0) {
+                    this.getFixer().css('width', this.getWidth());
+                }
+                if (this.settings.autoPosition && this.getPosition() !== 0) {
+                    this.getFixer().css(this.settings.autoPosition, this.getPosition());
                 }
 
                 // States
@@ -452,6 +531,11 @@
                     this.settings.onBottom.call(this);
                 }
 
+                // Auto
+                if (this.settings.autoPosition && this.getPosition() !== 0) {
+                    this.getFixer().css(this.settings.autoPosition, 0);
+                }
+
                 // States
                 this.getContainer()
                     .removeClass(this.settings.classes.reset)
@@ -482,8 +566,8 @@
                     this.settings.onReset.call(this);
                 }
 
-                // Auto-padding
-                if (this.settings.autoPadding && this.fixerHeight !== 0) {
+                // Auto
+                if (this.settings.autoPadding && this.getHeight() !== 0) {
                     this.getContainer().css('padding-top', 0);
                 }
 

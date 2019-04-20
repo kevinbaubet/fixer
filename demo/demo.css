@@ -175,7 +175,7 @@ footer a:hover {
 .demo-complex.is-fixed .map {
     position: fixed;
     top: 0;
-    width: 749px;
+    left: 0;
 }
 .demo-complex.is-bottom .map {
     position: absolute;

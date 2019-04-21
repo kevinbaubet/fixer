@@ -85,7 +85,7 @@
             if (self.settings.autoPadding) {
                 self.setHeight();
             }
-            if (self.settings.autoWidth || self.settings.autoPosition === 'right') {
+            if (self.settings.autoWidth) {
                 self.setWidth();
             }
             if (self.settings.autoPosition) {
@@ -243,7 +243,7 @@
          * Set current height
          */
         setHeight: function () {
-            this.fixerHeight = Math.round(this.getFixer().height());
+            this.fixerHeight = this.getFixer().height();
         },
 
         /**
@@ -259,7 +259,7 @@
          * Set current width
          */
         setWidth: function () {
-            this.fixerWidth = Math.round(this.getFixer().width());
+            this.fixerWidth = this.getFixer().width();
         },
 
         /**
@@ -275,11 +275,7 @@
          * Set current position from left or right
          */
         setPosition: function () {
-            this.fixerPosition = parseInt(this.getFixer().offset().left);
-
-            if (this.settings.autoPosition === 'right') {
-                this.fixerPosition += this.getWidth();
-            }
+            this.fixerPosition = this.getFixer().offset().left;
         },
 
         /**
@@ -470,7 +466,7 @@
             if (this.settings.autoPadding) {
                 this.setHeight();
             }
-            if (this.settings.autoWidth || this.settings.autoPosition === 'right') {
+            if (this.settings.autoWidth) {
                 this.setWidth();
             }
             if (this.settings.autoPosition) {
@@ -498,7 +494,7 @@
                     this.getFixer().css('width', this.getWidth());
                 }
                 if (this.settings.autoPosition && this.getPosition() !== 0) {
-                    this.getFixer().css(this.settings.autoPosition, this.getPosition());
+                    this.getFixer().css('left', this.getPosition());
                 }
 
                 // States
@@ -533,7 +529,7 @@
 
                 // Auto
                 if (this.settings.autoPosition && this.getPosition() !== 0) {
-                    this.getFixer().css(this.settings.autoPosition, 0);
+                    this.getFixer().attr('style', this.getFixer().attr('style').replace(/\s?left:\s?\d+.\d?px;/i, ''));
                 }
 
                 // States

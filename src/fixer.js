@@ -529,7 +529,7 @@
 
                 // Auto
                 if (this.settings.autoPosition && this.getPosition() !== 0) {
-                    this.getFixer().attr('style', this.getFixer().attr('style').replace(/\s?left:\s?\d+.\d?px;/i, ''));
+                    this.getFixer().css('left', '');
                 }
 
                 // States
@@ -564,7 +564,7 @@
 
                 // Auto
                 if (this.settings.autoPadding && this.getHeight() !== 0) {
-                    this.getContainer().css('padding-top', 0);
+                    this.getContainer().css('padding-top', '');
                 }
 
                 // States

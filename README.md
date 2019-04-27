@@ -1,14 +1,22 @@
 # Documentation Fixer
 
-Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
+Fixer permet de figer un élément en fonction du scroll.
 
 * Compatibilité : IE11+
 * Dépendance : jQuery
 
-
-## Initialisation
+## Initialiser Fixer
 
     var fixer = $('#element').fixer([options]);
+    
+    
+* @param *{object}* **options**  (optionnel) [Options](README.md#options)
+
+        var fixer = $('#element').fixer({
+            onFixed: function () {
+                console.log('#element is fixed!');
+            }
+        });
 
 
 ## Options
@@ -36,44 +44,166 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | &nbsp;&nbsp;&nbsp;&nbsp;input     | string   | 'is-input'           | Classe pour indiquer si on est en train de saisir un formulaire                                                                                               |
 | &nbsp;&nbsp;&nbsp;&nbsp;fixed     | string   | 'is-fixed'           | Classe pour indiquer si l'élement est fixé                                                                                                                    |
 | &nbsp;&nbsp;&nbsp;&nbsp;bottom    | string   | 'is-bottom'          | Classe pour indiquer si l'élement est arrivé en bas du conteneur                                                                                              |
-| &nbsp;&nbsp;&nbsp;&nbsp;reset     | string   | 'is-reset '          | Classe pour indiquer si l'élement est revenu à la normale                                                                                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;reset     | string   | 'is-reset'           | Classe pour indiquer si l'élement est revenu à la normale                                                                                                     |
+| &nbsp;&nbsp;&nbsp;&nbsp;disabled  | string   | 'is-disabled'        | Classe pour indiquer si l'élement est désactivé                                                                                                               |
 | afterEventsHandler                | function | undefined            | Callback après la déclaration des événements                                                                                                                  |
 | onScroll                          | function | undefined            | Callback lors du scroll                                                                                                                                       |
 | onResize                          | function | undefined            | Callback lors du resize                                                                                                                                       |
 | onFixed                           | function | undefined            | Callback une fois l'élément fixé                                                                                                                              |
 | onBottom                          | function | undefined            | Callback une fois l'élément arrivé en bas du conteneur                                                                                                        |
 | onReset                           | function | undefined            | Callback une fois l'élément revenu à la normale                                                                                                               |
+| onDisable                         | function | undefined            | Callback une fois l'élément désactivé                                                                                                                         |
 | onChangeState                     | function | undefined            | Callback à chaque changement d'état (default, fixed, bottom)                                                                                                  |
 
 
-## Méthodes
+## API
 
-| Méthode        | Arguments                                                                      | Description                                                              |
-|----------------|--------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| setStart       | **position** *int* Position                                                    | Définition de la position de départ                                      |
-| getStart       | -                                                                              | Récupération de la position de départ                                    |
-| setEnd         | **position** *int* Position, **addStart** *bool* Ajouter la position de départ | Définition de la position de fin                                         |
-| getEnd         | -                                                                              | Récupération de la position de fin                                       |
-| setHeight      | -                                                                              | Définition de la hauteur de l'élément fixé                               |
-| getHeight      | -                                                                              | Récupération de la hauteur de l'élément fixé                             |
-| setWidth       | -                                                                              | Définition de la largeur de l'élément fixé                               |
-| getWidth       | -                                                                              | Récupération de la largeur de l'élément fixé                             |
-| setPosition    | -                                                                              | Définition de la position de l'élément fixé                              |
-| getPosition    | -                                                                              | Récupération de la position de l'élément fixé                            |
-| setState       | **state** *string* default, fixed, bottom                                      | Définition de l'état courant                                             |
-| getState       | -                                                                              | Récupération de l'état courant                                           |
-| setScrollTop   | **type** *string* current, previous, **position** *int* Valeur du scroll       | Définition de la valeur courante ou précédente du scroll                 |
-| getScrollTop   | **type** *string* current, previous                                            | Récupération de la valeur courante ou précédente du scroll               |
-| setContainer   | -                                                                              | Définition du conteneur courant                                          |
-| getContainer   | **container** *jQuery object*                                                  | Récupération le conteneur courant                                        |
-| setFixer       | -                                                                              | Définition de l'élement à fixer                                          |
-| getFixer       | **element** *jQuery object*                                                    | Récupération l'élément à fixer courant                                   |
-| update         | -                                                                              | Met à jour les positions de début/fin de scroll par rapport au conteneur |
-| fixed          | -                                                                              | Fixe l'élément                                                           |
-| bottom         | -                                                                              | Place l'élément au bas du conteneur                                      |
-| reset          | -                                                                              | Remet l'élément à la normale                                             |
-| disable        | -                                                                              | Désactive Fixer                                                          | 
-| destroy        | -                                                                              | Enlève Fixer du DOM                                                      | 
+#### setContainer()
+
+Définition du conteneur courant
+
+* @param *{object}* **container** jQuery object
+
+        fixer.setContainer($('#container'));
+
+#### getContainer()
+
+Récupération du conteneur courant
+
+* @return *{object}*
+
+#### setFixer()
+
+Définition de l'élement à fixer
+
+* @param *{object}* **element** jQuery object
+
+        fixer.setFixer($('#element'));
+
+#### getFixer()
+
+Récupération l'élément à fixer
+
+* @return *{object}*
+
+#### setStart()
+
+Définition de la position de départ
+
+* @param *{int}* **position** Position
+
+        fixer.setStart(300);
+
+#### getStart()
+
+Récupération de la position de départ
+
+* @return *{int}*
+
+#### setEnd()
+
+Définition de la position de fin
+
+* @param *{int}* **position** Position
+* @param *{boolean=true}* **addStart** Ajouter la position de départ
+
+        fixer.setEnd(1000);
+
+#### getEnd()
+
+Récupération de la position de fin
+
+* @return *{int}*
+
+#### setHeight()
+
+Définition de la hauteur de l'élément fixé
+
+#### getHeight()
+
+Récupération de la hauteur de l'élément fixé
+
+* @return *{number}*
+
+#### setWidth()
+
+Définition de la largeur de l'élément fixé
+
+#### getWidth()
+
+Récupération de la largeur de l'élément fixé
+
+* @return *{number}*
+
+#### setPosition()
+
+Définition de la position de l'élément fixé
+
+#### getPosition()
+
+Récupération de la position de l'élément fixé
+
+* @return *{number}*
+
+#### setWindowSize()
+
+Définition de la taille de la fenêtre navigateur
+
+#### getWindowSize()
+
+Récupération de la taille de la fenêtre navigateur
+
+* @return *{object}*
+
+#### setState()
+
+Définition de l'état courant
+
+* @param *{string}* **state** default, fixed, bottom, disabled
+
+#### getState()
+
+Récupération de l'état courant
+
+* @return *{string}*
+
+#### setScrollTop()
+
+Définition de la valeur courante ou précédente du scroll
+
+* @param *{string}* **type** current, previous
+* @param *{int|string}* **position** Valeur du scroll
+
+#### getScrollTop()
+
+Récupération de la valeur courante ou précédente du scroll
+
+* @param *{string}* **type** current, previous
+* @return *{int}*
+
+#### update()
+
+Met à jour les positions et les valeurs automatiques
+
+#### fixed()
+
+Fixe l'élément
+
+#### bottom()
+
+Place l'élément au bas du conteneur
+
+#### reset()
+
+Remet l'élément à la normale
+
+#### disable()
+
+Désactive Fixer
+
+#### destroy()
+
+Enlève Fixer du DOM
 
 
 ## Événements personnalisés

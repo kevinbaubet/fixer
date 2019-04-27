@@ -75,6 +75,7 @@
         onFixed: undefined,
         onBottom: undefined,
         onReset: undefined,
+        onDisable: undefined,
         onChangeState: undefined
     };
 
@@ -113,6 +114,8 @@
 
         /**
          * Get current container
+         *
+         * @return {object}
          */
         getContainer: function () {
             return this.elements.container;
@@ -131,6 +134,8 @@
 
         /**
          * Get fixer element
+         *
+         * @return {object}
          */
         getFixer: function () {
             return this.elements.fixer;
@@ -292,7 +297,7 @@
         /**
          * Set current state information
          *
-         * @param {string} state default, fixed, bottom
+         * @param {string} state default, fixed, bottom, disabled
          */
         setState: function (state) {
             this.state = state;
@@ -313,7 +318,7 @@
          * Set current scroll top position
          *
          * @param {string} type current, previous
-         * @param {int} position
+         * @param {int|string} position
          */
         setScrollTop: function (type, position) {
             this.scrollTop[type] = parseInt(position);
@@ -513,31 +518,6 @@
         },
 
         /**
-         * Destroy Fixer
-         */
-        destroy: function () {
-            this.reset();
-            this.setState('default');
-            this.getContainer()
-                .removeClass(this.settings.classes.container)
-                .removeClass(this.settings.classes.disabled)
-                .removeClass(this.settings.classes.input);
-            this.getFixer().removeClass(this.settings.classes.element);
-            $(window).off('.' + this.settings.classes.prefix);
-
-            return this;
-        },
-
-        /**
-         * Disable Fixer
-         */
-        disable: function () {
-            this.reset();
-            this.setState('disabled');
-            this.getContainer().addClass(this.settings.classes.disabled);
-        },
-
-        /**
          * Update positions
          */
         update: function () {
@@ -681,6 +661,39 @@
                     });
                 }
             }
+
+            return this;
+        },
+
+        /**
+         * Disable Fixer
+         */
+        disable: function () {
+            this.reset();
+            this.setState('disabled');
+            this.getContainer().addClass(this.settings.classes.disabled);
+
+            // User callback
+            if (this.settings.onDisable !== undefined) {
+                this.settings.onDisable.call({
+                    fixer: this,
+                    state: this.getState()
+                });
+            }
+        },
+
+        /**
+         * Destroy Fixer
+         */
+        destroy: function () {
+            this.reset();
+            this.setState('default');
+            this.getContainer()
+                .removeClass(this.settings.classes.container)
+                .removeClass(this.settings.classes.disabled)
+                .removeClass(this.settings.classes.input);
+            this.getFixer().removeClass(this.settings.classes.element);
+            $(window).off('.' + this.settings.classes.prefix);
 
             return this;
         }

@@ -24,6 +24,7 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | resizeEvent                       | boolean  | false                | Activer/Désactiver l'événenement de resize. Voir section *Événements personnalisés*                                                                           |
 | resizeTimeout                     | integer  | 100                  | Delai avant l'execution de l'événement resize, en ms                                                                                                          |
 | autoLoad                          | boolean  | true                 | Éxecuter Fixer à l'événement *load*                                                                                                                           |
+| autoDisable                       | boolean  | true                 | Désactive automatiquement Fixer si l'élément à fixer est plus haut que la fenêtre du navigateur                                                               |
 | autoUpdate                        | boolean  | false                | Requis l'option *resizeEvent* à *true*. Met à jour les positions de départ/fin de Fixer lors de l'événement *resize*                                          |
 | autoPadding                       | boolean  | false                | Permet de compenser le décalage du scroll dans le conteneur lorsque l'élément est fixé                                                                        |
 | autoWidth                         | boolean  | false                | Permet de définir automatiquement la largeur de l'élément à fixer                                                                                             |
@@ -43,7 +44,6 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | onBottom                          | function | undefined            | Callback une fois l'élément arrivé en bas du conteneur                                                                                                        |
 | onReset                           | function | undefined            | Callback une fois l'élément revenu à la normale                                                                                                               |
 | onChangeState                     | function | undefined            | Callback à chaque changement d'état (default, fixed, bottom)                                                                                                  |
-| debug                             | boolean  | false                | Affiche des informations pour le debug                                                                                                                        |
 
 
 ## Méthodes
@@ -72,6 +72,7 @@ Ce script permet de fixer un élément par rapport à l'hauteur du scroll.
 | fixed          | -                                                                              | Fixe l'élément                                                           |
 | bottom         | -                                                                              | Place l'élément au bas du conteneur                                      |
 | reset          | -                                                                              | Remet l'élément à la normale                                             |
+| disable        | -                                                                              | Désactive Fixer                                                          | 
 | destroy        | -                                                                              | Enlève Fixer du DOM                                                      | 
 
 

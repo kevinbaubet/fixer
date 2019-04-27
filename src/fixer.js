@@ -1,6 +1,14 @@
 (function ($) {
     'use strict';
 
+    /**
+     * Fixer
+     *
+     * @param {object} element
+     * @param {object=undefined} options
+     *
+     * @return {$.Fixer}
+     */
     $.Fixer = function (element, options) {
         // Elements
         this.elements = {
@@ -23,10 +31,14 @@
         this.fixerHeight = 0;
         this.fixerWidth = 0;
         this.fixerPosition = 0;
+        this.windowSize = {
+            'width': 0,
+            'height': 0
+        };
 
         // Init
         if (this.prepareOptions()) {
-            return this.init();
+            this.init();
         }
 
         return this;
@@ -42,6 +54,7 @@
         resizeEvent: false,
         resizeTimeout: 100,
         autoLoad: true,
+        autoDisable: true,
         autoUpdate: false,
         autoPadding: false,
         autoWidth: false,
@@ -53,7 +66,8 @@
             input: 'is-input',
             fixed: 'is-fixed',
             bottom: 'is-bottom',
-            reset: 'is-reset'
+            reset: 'is-reset',
+            disabled: 'is-disabled'
         },
         afterEventsHandler: undefined,
         onScroll: undefined,
@@ -61,8 +75,7 @@
         onFixed: undefined,
         onBottom: undefined,
         onReset: undefined,
-        onChangeState: undefined,
-        debug: false
+        onChangeState: undefined
     };
 
     $.Fixer.prototype = {
@@ -77,21 +90,6 @@
             // Container
             self.setContainer(self.settings.container !== undefined && self.settings.container.length ? self.settings.container : $('body'));
 
-            // Start/End
-            self.setStart(self.settings.start);
-            self.setEnd(self.settings.end);
-
-            // Auto
-            if (self.settings.autoPadding) {
-                self.setHeight();
-            }
-            if (self.settings.autoWidth) {
-                self.setWidth();
-            }
-            if (self.settings.autoPosition) {
-                self.setPosition();
-            }
-
             // Classes
             $.each(self.settings.classes, function (key, value) {
                 if (typeof value === 'string') {
@@ -99,52 +97,13 @@
                 }
             });
 
-            // Debug
-            if (self.settings.debug) {
-                if (self.settings.onScroll === undefined) {
-                    self.settings.onScroll = function () {
-                        console.log('scrollTop: ' + this.fixer.getScrollTop());
-                    }
-                }
-                if (self.settings.onChangeState === undefined) {
-                    self.settings.onChangeState = function () {
-                        console.log('state: ' + this.state);
-                    }
-                }
-            }
-
             return true;
-        },
-
-        /**
-         * Init Fixer
-         */
-        init: function () {
-            this.getContainer().addClass(this.settings.classes.container);
-            this.getFixer().addClass(this.settings.classes.element);
-
-            this.eventsHandler();
-
-            return this;
-        },
-
-        /**
-         * Destroy Fixer
-         */
-        destroy: function () {
-            this.reset();
-            this.setState('default');
-            this.getContainer().removeClass(this.settings.classes.container);
-            this.getFixer().removeClass(this.settings.classes.element);
-            $(window).off('.' + this.settings.classes.prefix);
-
-            return this;
         },
 
         /**
          * Set current container
          *
-         * @param container jQuery object
+         * @param {object} container jQuery object
          */
         setContainer: function (container) {
             this.elements.container = container;
@@ -162,7 +121,7 @@
         /**
          * Set fixer element
          *
-         * @param element jQuery object
+         * @param {object} element jQuery object
          */
         setFixer: function (element) {
             this.elements.fixer = element;
@@ -180,7 +139,7 @@
         /**
          * Set start position
          *
-         * @param position (int)
+         * @param {int} position
          */
         setStart: function (position) {
             this.start = parseInt(position === undefined ? this.getFixer().offset().top : this.getContainer().offset().top + position);
@@ -189,17 +148,13 @@
                 this.start -= parseInt(this.settings.offset);
             }
 
-            if (this.settings.debug) {
-                console.log('start: ' + this.getStart());
-            }
-
             return this;
         },
 
         /**
          * Get start position
          *
-         * @return int
+         * @return {int}
          */
         getStart: function () {
             return this.start;
@@ -208,8 +163,8 @@
         /**
          * Set end position
          *
-         * @param position (int)
-         * @param addStart (boolean)
+         * @param {int} position
+         * @param {boolean=true} addStart
          */
         setEnd: function (position, addStart) {
             addStart = addStart || true;
@@ -223,17 +178,13 @@
                 this.end -= parseInt(this.settings.offset);
             }
 
-            if (this.settings.debug) {
-                console.log('end: ' + this.getEnd());
-            }
-
             return this;
         },
 
         /**
          * Get end position
          *
-         * @return int
+         * @return {int}
          */
         getEnd: function () {
             return this.end;
@@ -244,6 +195,8 @@
          */
         setHeight: function () {
             this.fixerHeight = this.getFixer().height();
+
+            return this;
         },
 
         /**
@@ -259,7 +212,22 @@
          * Set current width
          */
         setWidth: function () {
+            if (this.getState() === 'fixed') {
+                this.getFixer().css({
+                    'position': '',
+                    'width': ''
+                });
+            }
+
             this.fixerWidth = this.getFixer().width();
+
+            if (this.getState() === 'fixed') {
+                this.getFixer().css({
+                    'width': this.getWidth()
+                });
+            }
+
+            return this;
         },
 
         /**
@@ -275,7 +243,22 @@
          * Set current position from left or right
          */
         setPosition: function () {
+            if (this.getState() === 'fixed') {
+                this.getFixer().css({
+                    'position': '',
+                    'left': ''
+                });
+            }
+
             this.fixerPosition = this.getFixer().offset().left;
+
+            if (this.getState() === 'fixed') {
+                this.getFixer().css({
+                    'left': this.getPosition()
+                });
+            }
+
+            return this;
         },
 
         /**
@@ -288,9 +271,28 @@
         },
 
         /**
+         * Set current window size
+         */
+        setWindowSize: function () {
+            return this.windowSize = {
+                'width': window.innerWidth,
+                'height': window.innerHeight
+            };
+        },
+
+        /**
+         * Get current window size
+         *
+         * @return {object}
+         */
+        getWindowSize: function () {
+            return this.windowSize;
+        },
+
+        /**
          * Set current state information
          *
-         * @param state (string) default, fixed, bottom
+         * @param {string} state default, fixed, bottom
          */
         setState: function (state) {
             this.state = state;
@@ -301,7 +303,7 @@
         /**
          * Get current state
          *
-         * @return string (default, fixed, bottom)
+         * @return {string}
          */
         getState: function () {
             return this.state;
@@ -310,8 +312,8 @@
         /**
          * Set current scroll top position
          *
-         * @param type (string) current, previous
-         * @param position (int)
+         * @param {string} type current, previous
+         * @param {int} position
          */
         setScrollTop: function (type, position) {
             this.scrollTop[type] = parseInt(position);
@@ -322,9 +324,9 @@
         /**
          * Get current scroll top position
          *
-         * @param type (string) current, previous. current per default
+         * @param {string} type current, previous. current per default
          *
-         * @return int
+         * @return {int}
          */
         getScrollTop: function (type) {
             type = type || 'current';
@@ -375,50 +377,57 @@
         /**
          * Event scroll
          *
-         * @param event
+         * @param {object=undefined} event
          */
         scrollHandler: function (event) {
             var self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
 
             window.requestAnimationFrame(function () {
-                self.setScrollTop('current', window.pageYOffset);
+                if (self.getState() !== 'disabled') {
+                    self.setScrollTop('current', window.pageYOffset);
 
-                // Reverse mode
-                if (self.settings.reverse) {
-                    // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
-                    if (self.getScrollTop('previous') > self.getScrollTop() && self.getScrollTop() >= self.getStart()) {
-                        self.fixed();
-                    }
-                    // Si le scroll défile normalement, on remet à l'état par défaut
-                    else if (self.getScrollTop('previous') < self.getScrollTop() || self.getScrollTop() < self.getStart()) {
-                        self.reset();
+                    // Check resize fixer
+                    if (self.settings.autoUpdate && self.getHeight() !== self.getFixer().height()) {
+                        self.resizeHandler();
                     }
 
-                    self.setScrollTop('previous', self.getScrollTop());
-                }
-                // Default mode
-                else {
-                    // Si le scroll est entre le start/end défini, on fixe
-                    if (self.getScrollTop() > self.getStart() && self.getScrollTop() <= self.getEnd()) {
-                        self.fixed();
+                    // Reverse mode
+                    if (self.settings.reverse) {
+                        // Si le scroll précédent est supérieur à l'actuel, c'est qu'on remonte la page
+                        if (self.getScrollTop('previous') > self.getScrollTop() && self.getScrollTop() >= self.getStart()) {
+                            self.fixed();
+                        }
+                        // Si le scroll défile normalement, on remet à l'état par défaut
+                        else if (self.getScrollTop('previous') < self.getScrollTop() || self.getScrollTop() < self.getStart()) {
+                            self.reset();
+                        }
+
+                        self.setScrollTop('previous', self.getScrollTop());
                     }
-                    // Si le scroll est supérieur à to, on arrête de fixer
-                    else if (self.getScrollTop() >= self.getEnd()) {
-                        self.bottom();
-                    }
-                    // Sinon, on remet à l'état par défaut
+                    // Default mode
                     else {
-                        self.reset();
+                        // Si le scroll est entre le start/end défini, on fixe
+                        if (self.getScrollTop() > self.getStart() && self.getScrollTop() <= self.getEnd()) {
+                            self.fixed();
+                        }
+                        // Si le scroll est supérieur à to, on arrête de fixer
+                        else if (self.getScrollTop() >= self.getEnd()) {
+                            self.bottom();
+                        }
+                        // Sinon, on remet à l'état par défaut
+                        else {
+                            self.reset();
+                        }
                     }
-                }
 
-                // User callback
-                if (self.settings.onScroll !== undefined) {
-                    self.settings.onScroll.call({
-                        fixer: self,
-                        event: event.data === undefined ? event.event : event,
-                        state: self.getState()
-                    });
+                    // User callback
+                    if (self.settings.onScroll !== undefined) {
+                        self.settings.onScroll.call({
+                            fixer: self,
+                            event: event.data === undefined ? event.event : event,
+                            state: self.getState()
+                        });
+                    }
                 }
             });
 
@@ -428,7 +437,7 @@
         /**
          * Event resize
          *
-         * @param event
+         * @param {object=undefined} event
          */
         resizeHandler: function (event) {
             var self = (event !== undefined && event.data !== undefined && event.data.self !== undefined) ? event.data.self : this;
@@ -456,21 +465,95 @@
         },
 
         /**
-         * Update positions
+         * Handle for auto disable fixer
          */
-        update: function () {
-            this.setStart(0);
-            this.setEnd();
+        disableHandler: function () {
+            this.setWindowSize();
+
+            if (this.getHeight() >= this.getWindowSize().height) {
+                this.disable();
+
+            } else if (this.getState() === 'disabled') {
+                this.reset();
+                this.scrollHandler();
+            }
+
+            return this;
+        },
+
+        /**
+         * Init Fixer
+         */
+        init: function () {
+            this.getContainer()
+                .addClass(this.settings.classes.container)
+                .removeClass(this.settings.classes.disabled);
+            this.getFixer().addClass(this.settings.classes.element);
+
+            // Start/End
+            this.setStart(this.settings.start);
+            this.setEnd(this.settings.end);
+            this.setHeight();
 
             // Auto
-            if (this.settings.autoPadding) {
-                this.setHeight();
-            }
             if (this.settings.autoWidth) {
                 this.setWidth();
             }
             if (this.settings.autoPosition) {
                 this.setPosition();
+            }
+            if (this.settings.autoDisable) {
+                this.disableHandler();
+            }
+
+            // Events
+            this.eventsHandler();
+
+            return this;
+        },
+
+        /**
+         * Destroy Fixer
+         */
+        destroy: function () {
+            this.reset();
+            this.setState('default');
+            this.getContainer()
+                .removeClass(this.settings.classes.container)
+                .removeClass(this.settings.classes.disabled)
+                .removeClass(this.settings.classes.input);
+            this.getFixer().removeClass(this.settings.classes.element);
+            $(window).off('.' + this.settings.classes.prefix);
+
+            return this;
+        },
+
+        /**
+         * Disable Fixer
+         */
+        disable: function () {
+            this.reset();
+            this.setState('disabled');
+            this.getContainer().addClass(this.settings.classes.disabled);
+        },
+
+        /**
+         * Update positions
+         */
+        update: function () {
+            this.setStart(this.settings.start);
+            this.setEnd(this.settings.end);
+            this.setHeight();
+
+            // Auto
+            if (this.settings.autoWidth) {
+                this.setWidth();
+            }
+            if (this.settings.autoPosition) {
+                this.setPosition();
+            }
+            if (this.settings.autoDisable) {
+                this.disableHandler();
             }
 
             return this;
@@ -493,7 +576,7 @@
                 if (this.settings.autoWidth && this.getWidth() !== 0) {
                     this.getFixer().css('width', this.getWidth());
                 }
-                if (this.settings.autoPosition && this.getPosition() !== 0) {
+                if (this.settings.autoPosition) {
                     this.getFixer().css('left', this.getPosition());
                 }
 
@@ -528,7 +611,10 @@
                 }
 
                 // Auto
-                if (this.settings.autoPosition && this.getPosition() !== 0) {
+                if (this.settings.autoWidth) {
+                    this.getFixer().css('width', '');
+                }
+                if (this.settings.autoPosition) {
                     this.getFixer().css('left', '');
                 }
 
@@ -563,15 +649,26 @@
                 }
 
                 // Auto
-                if (this.settings.autoPadding && this.getHeight() !== 0) {
+                if (this.settings.autoPadding) {
                     this.getContainer().css('padding-top', '');
+                }
+                if (this.settings.autoWidth) {
+                    this.getFixer().css('width', '');
+                }
+                if (this.settings.autoPosition) {
+                    this.getFixer().css('left', '');
                 }
 
                 // States
-                this.getContainer().removeClass(this.settings.classes.fixed);
+                this.getContainer()
+                    .removeClass(this.settings.classes.bottom)
+                    .removeClass(this.settings.classes.fixed);
 
                 if (this.getState() === 'fixed') {
                     this.getContainer().addClass(this.settings.classes.reset);
+                }
+                if (this.getState() === 'disabled') {
+                    this.getContainer().removeClass(this.settings.classes.disabled);
                 }
 
                 this.setState('default');

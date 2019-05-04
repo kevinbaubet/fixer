@@ -1,8 +1,11 @@
 {
-  "name": "kevinbaubet-fixer",
+  "name": "@kevinbaubet/fixer",
   "version": "3.2.1",
   "main": "./dist/fixer.min.js",
-  "repository": "https://github.com/kevinbaubet/fixer.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinbaubet/fixer.git"
+  },
   "author": "Kévin Baubet <contact@kevinbaubet.fr>",
   "license": "MIT",
   "dependencies": {

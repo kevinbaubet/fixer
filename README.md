@@ -117,7 +117,13 @@ Récupération de la position de fin
 
 #### setHeight()
 
-Définition de la hauteur de l'élément fixé
+Définition de la hauteur de l'élément fixé et du conteneur
+
+#### getContainerHeight()
+
+Récupération de la hauteur du conteneur
+
+* @return *{number}*
 
 #### getHeight()
 

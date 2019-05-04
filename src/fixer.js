@@ -28,6 +28,7 @@
         this.start = 0;
         this.end = 0;
         this.resizeTimeout = undefined;
+        this.containerHeight = 0;
         this.fixerHeight = 0;
         this.fixerWidth = 0;
         this.fixerPosition = 0;
@@ -199,13 +200,23 @@
          * Set current height
          */
         setHeight: function () {
+            this.containerHeight = this.getContainer().height();
             this.fixerHeight = this.getFixer().height();
 
             return this;
         },
 
         /**
-         * Get current height
+         * Get current container height
+         *
+         * @return {number}
+         */
+        getContainerHeight: function () {
+            return this.containerHeight;
+        },
+
+        /**
+         * Get current fixer height
          *
          * @return {number}
          */
@@ -217,20 +228,7 @@
          * Set current width
          */
         setWidth: function () {
-            if (this.getState() === 'fixed') {
-                this.getFixer().css({
-                    'position': '',
-                    'width': ''
-                });
-            }
-
             this.fixerWidth = this.getFixer().width();
-
-            if (this.getState() === 'fixed') {
-                this.getFixer().css({
-                    'width': this.getWidth()
-                });
-            }
 
             return this;
         },
@@ -248,20 +246,7 @@
          * Set current position from left or right
          */
         setPosition: function () {
-            if (this.getState() === 'fixed') {
-                this.getFixer().css({
-                    'position': '',
-                    'left': ''
-                });
-            }
-
             this.fixerPosition = this.getFixer().offset().left;
-
-            if (this.getState() === 'fixed') {
-                this.getFixer().css({
-                    'left': this.getPosition()
-                });
-            }
 
             return this;
         },
@@ -475,7 +460,7 @@
         disableHandler: function () {
             this.setWindowSize();
 
-            if (this.getHeight() >= this.getWindowSize().height) {
+            if (this.getHeight() >= this.getWindowSize().height || this.getHeight() >= this.getContainerHeight()) {
                 this.disable();
 
             } else if (this.getState() === 'disabled') {
@@ -493,25 +478,10 @@
             this.getContainer()
                 .addClass(this.settings.classes.container)
                 .removeClass(this.settings.classes.disabled);
+
             this.getFixer().addClass(this.settings.classes.element);
 
-            // Start/End
-            this.setStart(this.settings.start);
-            this.setEnd(this.settings.end);
-            this.setHeight();
-
-            // Auto
-            if (this.settings.autoWidth) {
-                this.setWidth();
-            }
-            if (this.settings.autoPosition) {
-                this.setPosition();
-            }
-            if (this.settings.autoDisable) {
-                this.disableHandler();
-            }
-
-            // Events
+            this.update();
             this.eventsHandler();
 
             return this;
@@ -521,6 +491,11 @@
          * Update positions
          */
         update: function () {
+            // Reset
+            var prevState = this.getState();
+            this.reset();
+
+            // Set new values
             this.setStart(this.settings.start);
             this.setEnd(this.settings.end);
             this.setHeight();
@@ -534,6 +509,11 @@
             }
             if (this.settings.autoDisable) {
                 this.disableHandler();
+            }
+
+            // Reinit
+            if ((prevState === 'fixed' || prevState === 'bottom') && typeof this[prevState] === 'function') {
+                this[prevState]();
             }
 
             return this;

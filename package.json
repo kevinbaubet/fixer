@@ -1,5 +1,5 @@
 {
-  "name": "fixer",
+  "name": "kevinbaubet-fixer",
   "version": "3.2.1",
   "main": "./dist/fixer.min.js",
   "repository": "https://github.com/kevinbaubet/fixer.git",
@@ -10,7 +10,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^9.4.7",
-    "pump": "^3.0.0",
     "gulp": "^4.0.0",
     "gulp-load-plugins": "^1.5.0",
     "gulp-pixrem": "^1.0.0",

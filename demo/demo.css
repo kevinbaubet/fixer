@@ -113,26 +113,24 @@ aside {
     height: 120vh;
 }
 .aside-block {
-    padding: 20px 10%;
     height: 50vh;
     background: #fff;
     overflow: hidden;
 }
 .aside-block p {
+    padding: 20px 19px;
     color: #000;
 }
 section.is-fixed .aside-block {
     position: fixed;
     top: 70px;
-    width: 154px;
-    padding: 20px 19px;
+    width: 100%;
 }
 section.is-bottom .aside-block {
     position: absolute;
     right: 0;
     bottom: 0;
-    padding: 20px 19px;
-    width: 154px;
+    width: 100%;
 }
 footer {
     position: fixed;

@@ -52,7 +52,7 @@
         offset: 0,
         reverse: false,
         scrollEvent: true,
-        resizeEvent: false,
+        resizeEvent: true,
         resizeTimeout: 100,
         autoLoad: true,
         autoDisable: true,
@@ -179,11 +179,7 @@
             if (addStart !== undefined && addStart === true) {
                 this.end += this.getStart();
             }
-
-            if (this.settings.offset) {
-                this.end -= parseInt(this.settings.offset);
-            }
-
+            
             return this;
         },
 
@@ -512,7 +508,7 @@
             }
 
             // Reinit
-            if ((prevState === 'fixed' || prevState === 'bottom') && typeof this[prevState] === 'function') {
+            if ((prevState === 'fixed' || prevState === 'bottom') && typeof this[prevState] === 'function') {
                 this[prevState]();
             }
 
@@ -526,7 +522,9 @@
             if (this.getState() !== 'fixed') {
                 // User callback
                 if (this.settings.onFixed !== undefined) {
-                    this.settings.onFixed.call(this);
+                    this.settings.onFixed.call({
+                        fixer: this
+                    });
                 }
 
                 // Auto
@@ -567,7 +565,9 @@
             if (this.getState() !== 'bottom') {
                 // User callback
                 if (this.settings.onBottom !== undefined) {
-                    this.settings.onBottom.call(this);
+                    this.settings.onBottom.call({
+                        fixer: this
+                    });
                 }
 
                 // Auto
@@ -605,7 +605,9 @@
             if (this.getState() !== 'default') {
                 // User callback
                 if (this.settings.onReset !== undefined) {
-                    this.settings.onReset.call(this);
+                    this.settings.onReset.call({
+                        fixer: this
+                    });
                 }
 
                 // Auto

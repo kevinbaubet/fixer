@@ -179,7 +179,7 @@
             if (addStart !== undefined && addStart === true) {
                 this.end += this.getStart();
             }
-            
+
             return this;
         },
 
@@ -310,7 +310,7 @@
         /**
          * Get current scroll top position
          *
-         * @param {string} type current, previous. current per default
+         * @param {string=current} type current, previous. current per default
          *
          * @return {int}
          */

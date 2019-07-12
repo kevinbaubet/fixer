@@ -177,7 +177,7 @@ Récupération de l'état courant
 
 Définition de la valeur courante ou précédente du scroll
 
-* @param *{string}* **type** current, previous
+* @param *{string=current}* **type** current, previous
 * @param *{int|string}* **position** Valeur du scroll
 
 #### getScrollTop()

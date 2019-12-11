@@ -84,7 +84,7 @@
         /**
          * Prepare user options
          *
-         * @return boolean
+         * @return {boolean}
          */
         prepareOptions: function () {
             var self = this;
@@ -373,8 +373,8 @@
                     self.setScrollTop('current', window.pageYOffset);
 
                     // Check resize fixer
-                    if (self.settings.autoUpdate && self.getHeight() !== self.getFixer().height()) {
-                        self.resizeHandler();
+                    if (self.settings.autoUpdate && (self.getHeight() !== self.getFixer().height() || self.getContainerHeight() !== self.getContainer().height())) {
+                        self.update();
                     }
 
                     // Reverse mode
